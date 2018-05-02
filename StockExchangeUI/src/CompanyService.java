@@ -68,10 +68,10 @@ public class CompanyService {
 		double small = MinVal*5/6;
 		double large = MaxVal*11/10;
 		double mult = h/(large-small);
-		int div = w/OpenDate.size();
+		double div = 1.0*w/OpenDate.size();
 		for(int i = 0; i < OpenDate.size(); i++){
 			int[] py = {y+h, y+(int)(h - mult*(OpenPrice.get(i)-small)), y+(int)(h - mult*(ClosePrice.get(i)-small)), y+h};
-			int[] px = {x+div*i, x+div*i, x+div*(i+1), x+div*(i+1)};
+			int[] px = {(int)(x+div*i), (int)(x+div*i), (int)(x+div*(i+1)), (int)(x+div*(i+1))};
 			Polygon p = new Polygon(px,py,4);
 			g.fillPolygon(p);
 		}
@@ -79,7 +79,7 @@ public class CompanyService {
 		if(f.mx < x+w && f.mx > x && f.my < y+h && f.my > y)
 			inx = f.mx-x;
 
-		int index = inx/div;
+		int index = (int)(inx/div);
 		double per = 1.0*(inx-index*div)/div;
 		double value = (int)(100*((1-per)*OpenPrice.get(index)+per*ClosePrice.get(index)))/100.0;
 		int yy = y+(int)(h - mult*(value-small));
