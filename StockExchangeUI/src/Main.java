@@ -8,7 +8,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 public class Main {
-	private static String username;
+	public static String username, password;
 	private static int admin;
 	
 	public static void main(String[] args) {
@@ -53,9 +53,11 @@ public class Main {
 			ResultSet rs = stmt.executeQuery();
 			if(rs.next()){
 				admin = rs.getInt(rs.findColumn("Admin"));
-				String password = rs.getString(rs.findColumn("Password"));
-				if(Arrays.equals(password.toCharArray(), pass_field.getPassword()))
+				String pass = rs.getString(rs.findColumn("Password"));
+				if(Arrays.equals(pass.toCharArray(), pass_field.getPassword())){
+					password = pass;
 					return true;
+				}
 			}
 			JOptionPane.showMessageDialog(null, "Username or password incorrect.");
 			return false;
