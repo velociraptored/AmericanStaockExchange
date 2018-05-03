@@ -1,6 +1,15 @@
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
+
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
@@ -14,6 +23,8 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 	// Database variables and services
 	public DBConnection DBCon;
 	private CompanyService cs;
+	private Broker broker;
+	private UserDetailsService ds;
 
 	// User interface variables
 	public Font title = new Font("Candara", 0, 40);
@@ -52,17 +63,18 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 		};
 		Runtime.getRuntime().addShutdownHook(new Thread(r));
 		cs = new CompanyService(this);
+		broker=new Broker(this);
 	}
 
 	// Framestate management
 	public void run(){
-		String[] names = {"Company data","test"};
+		String[] names = {"Company data","Test","Broker"};
 		while(true){
 			String page = (String) JOptionPane.showInputDialog(null, "Select page to view.", 
 					"View Selection", JOptionPane.QUESTION_MESSAGE, null, names, names[0]);
 			if(page == null || page.length() == 0)
 				System.exit(0);
-			if(page.equals("test")){
+			if(page.equals("Test")){
 				setVisible(true);
 				stay = true;
 				while(stay){
@@ -89,7 +101,22 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 					}
 					setVisible(false);
 				}
-			}else{
+			}else if(page.equals("Broker")){
+				while(true){
+					stay = true;
+					setVisible(true);
+					while(stay){
+						g.setColor(Color.DARK_GRAY);
+						g.fillRect(0, 0, WIDTH, HEIGHT);
+						broker.draw_page(g);
+						this.getGraphics().drawImage(img, 9, 38, null);
+						try{Thread.sleep(30);}catch(Exception e){};
+					}
+					setVisible(false);
+				}
+				
+			}
+			else{
 				System.out.println("How did you even get here?");
 			}
 		}
