@@ -127,10 +127,15 @@ public class CompanyAdminPage extends Page{
 	// Database Write Operations
 	public void requestInsert(){
 		JTextField f1 = new JTextField();
+		f1.setDocument(new JTextFieldLimit(50));
 		JTextField f2 = new JTextField();
+		f2.setDocument(new JTextFieldLimit(10));
 		JTextField f3 = new JTextField();
+		f3.setDocument(new JTextFieldLimit(20));
 		JTextField f4 = new JTextField();
+		f4.setDocument(new JTextFieldLimit(30));
 		JTextField f5 = new JTextField();
+		f5.setDocument(new JTextFieldLimit(4));
 		Object[] message = {
 				"Company Name:", f1,
 				"Abbreviation:", f2,
@@ -153,9 +158,13 @@ public class CompanyAdminPage extends Page{
 			return;
 		String abbr = CompanyAbbreviations.get(index);
 		JTextField f1 = new JTextField();
+		f1.setDocument(new JTextFieldLimit(50));
 		JTextField f2 = new JTextField();
+		f2.setDocument(new JTextFieldLimit(20));
 		JTextField f3 = new JTextField();
+		f3.setDocument(new JTextFieldLimit(30));
 		JTextField f4 = new JTextField();
+		f4.setDocument(new JTextFieldLimit(4));
 		Object[] message = {
 				"Company Name:", f1,
 				"Country:", f2,

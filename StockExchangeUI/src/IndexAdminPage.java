@@ -124,8 +124,11 @@ public class IndexAdminPage extends Page{
 	// Database Write Operations
 	public void requestInsert(){
 		JTextField f1 = new JTextField();
+		f1.setDocument(new JTextFieldLimit(20));
 		JTextField f2 = new JTextField();
+		f2.setDocument(new JTextFieldLimit(12));
 		JTextField f3 = new JTextField();
+		f3.setDocument(new JTextFieldLimit(20));
 		Object[] message = {
 				"Index Name:", f1,
 				"Total Number of Stocks:", f2,
@@ -146,8 +149,11 @@ public class IndexAdminPage extends Page{
 			return;
 		Integer ID = IndexIDs.get(index);
 		JTextField f1 = new JTextField();
+		f1.setDocument(new JTextFieldLimit(20));
 		JTextField f2 = new JTextField();
+		f2.setDocument(new JTextFieldLimit(12));
 		JTextField f3 = new JTextField();
+		f3.setDocument(new JTextFieldLimit(20));
 		Object[] message = {
 				"Index Name:", f1,
 				"Total Number of Stocks:", f2,
