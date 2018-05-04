@@ -134,11 +134,19 @@ public class Broker extends Page {
 	}
 	
 	public void click(int x, int y){
-		if(in(500,Frame.border+10,150,30,x,y)){
-			hire();
-		}
-		else if(in(600,160,60,20,x,y)){
+		if(in(600,160,60,20,x,y)){
 			fire();
+		}
+		if(Username==null){
+			for(int i=0;i<BrokerData.size();i++){
+				if(in(600, 240+i*40, 60, 20,x,y))
+					hire();
+			}
+		}else{
+			for(int i=0;i<BrokerPart.size();i++){
+				if(in(600, 240+i*40, 60, 20,x,y))
+					hire();
+			}
 		}
 		
 	}
@@ -151,9 +159,27 @@ public class Broker extends Page {
 	}
 	
 	public void hire(){
+		JTextField f1 = new JTextField();
+		JTextField f2 = new JTextField();
+		
+		Object[] message = {
+				"Username:", f1,
+				"BID:", f2,
+		};
+		int option = JOptionPane.showConfirmDialog(null, message, "Hire current broker", JOptionPane.OK_CANCEL_OPTION);
+		if (option == JOptionPane.OK_OPTION){
+			try{
+				hireBroker(f1.getText(),f2.getText());
+			}catch(NumberFormatException e){
+				JOptionPane.showMessageDialog(null, "Year must be an integer.");
+			}
+			getPartBroker();
+			getAllBroker();
+			getBrokerData();
+		} 
 		
 	}
-	
+
 	public void fire(){
 		JTextField f1 = new JTextField();
 		JTextField f2 = new JTextField();
@@ -169,12 +195,32 @@ public class Broker extends Page {
 			}catch(NumberFormatException e){
 				JOptionPane.showMessageDialog(null, "Year must be an integer.");
 			}
-			getAllBroker();
 			getPartBroker();
+			getAllBroker();
 			getBrokerData();
-			
 		}
 		
+	}
+	
+	public void hireBroker(String Username,String BID){
+		try{
+			String sqlStatement = "{ ? = call HireBroker(?,?) }";
+			CallableStatement proc = f.DBCon.getConnection().prepareCall(sqlStatement);
+			proc.registerOutParameter(1, Types.INTEGER);
+			proc.setString(2, Username);
+			proc.setString(3, BID);
+			proc.execute();
+
+			int status = proc.getInt(1);
+			if(status == 1){
+				JOptionPane.showMessageDialog(null,"ERROR: Broker already hired in the database.");
+			}else{
+				JOptionPane.showMessageDialog(null, "Broker hired.");
+			}
+		}catch(SQLException ex){
+			JOptionPane.showMessageDialog(null, "Failed to run query.");
+			ex.printStackTrace();
+		}
 	}
 	
 	public void fireBroker(String Username,String BID){
@@ -197,5 +243,6 @@ public class Broker extends Page {
 			ex.printStackTrace();
 		}
 	}
+	
 
 }
