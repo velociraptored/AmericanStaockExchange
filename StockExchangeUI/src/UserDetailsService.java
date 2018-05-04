@@ -1,5 +1,7 @@
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -31,35 +33,27 @@ public class UserDetailsService {
 		g.setFont(f.title);
 		g.drawString(FName + " " + MID + " " + LName, 20, 40);
 
-		int gx = 30, gy = 80;
-		int gw = 300, gh = 200;
 		g.setColor(Color.DARK_GRAY);
-		g.drawRect(gx, gy, gw, gh);
-
-		// g.setFont(f.title);
-		// g.drawRect(Frame.WIDTH - 330, 320, 300, 210);
-		// g.drawString(Email, Frame.WIDTH - 330 + 10, 360);
 		g.setFont(f.text);
 		if (Email == null) {
 			Email = "";
 		}
-		g.drawString(Username, 45, 100);
-		g.drawString(Email, 45, 130);
-		g.drawString("Total Profits: " + NetGain, 45, 160);
+		g.drawString(Username, 50, 100);
+		g.drawString(Email, 50, 130);
+		g.drawString("Total Profits: " + NetGain, 50, 160);
 		if (Admin == 0)
-			g.drawString("Access level: Standard User", 45, 190);
+			g.drawString("Access level: Standard User", 50, 190);
 		else
-			g.drawString("Access level: Administrator", 45, 190);
+			g.drawString("Access level: Administrator", 50, 190);
 
 		if (listStocks.size() > 0) {
 			g.setFont(f.title);
-			g.drawString("Stocks", Frame.WIDTH - 450, 380);
+			g.drawString("Stocks", 50, 250);
 			g.setFont(f.text);
-			// g.drawLine(x1, y1, x2, y2);
 			for (int i = 0; i < listStocks.size(); i++) {
-				g.drawString(listStocks.get(i).get(0), Frame.WIDTH - 450, 420 + 25 * i);
-				g.drawString(listStocks.get(i).get(1), Frame.WIDTH - 400, 420 + 25 * i);
-				g.drawString(listStocks.get(i).get(2), Frame.WIDTH - 300, 420 + 25 * i);
+				g.drawString(listStocks.get(i).get(0), 50, 300 + 25 * i);
+				g.drawString(listStocks.get(i).get(1), 100, 300 + 25 * i);
+				g.drawString(listStocks.get(i).get(2), 300, 300 + 25 * i);
 			}
 		}
 
@@ -110,5 +104,5 @@ public class UserDetailsService {
 		}
 		return true;
 	}
-	
+
 }

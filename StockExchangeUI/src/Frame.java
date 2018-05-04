@@ -28,7 +28,7 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 	private UserDetailsService ds;
 	private CompanyAdminPage cas;
 	private IndexAdminPage ias;
-	//private AdminHomePage adminService;
+	private AdminHomepage ahs;
 	
 	private Page current_page = null;
 
@@ -75,16 +75,18 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 		broker=new Broker(this);
 		cas = new CompanyAdminPage(this);
 		ias = new IndexAdminPage(this);
+		ds = new UserDetailsService(this);
+		ahs = new AdminHomepage(this);
 	}
 
 	// Framestate management
 	public void run(){
 		String[] names = {};
 		if(admin){
-			String[] temp = {"Company data","Index data","Manage Company Data","Manage Index Data","Broker"};
+			String[] temp = {"Company data","Index data","Manage Company Data","Manage Index Data","Broker", "Admin Homepage", "User Details"};
 			names = temp;
 		}else{
-			String[] temp = {"Company data","Index data","Broker"};
+			String[] temp = {"Company data","Index data","Broker", "User Details"};
 			names = temp;
 		}
 		while(true){
@@ -173,6 +175,51 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 				}
 				current_page = null;
 				setVisible(false);
+			}else if (page.equals("User Details")) {
+				stay = true;
+				if (!ds.getUserData())
+					break;
+				if (!stay) {
+					setVisible(false);
+					page = "";
+					break;
+				}
+				setVisible(true);
+				while (stay) {
+					g.setColor(Color.DARK_GRAY);
+					g.fillRect(0, 0, WIDTH, HEIGHT);
+					ds.draw_page(g);
+					this.getGraphics().drawImage(img, 9, 38, null);
+					try {
+						Thread.sleep(30);
+					} catch (Exception e) {
+					}
+					;
+				}
+				setVisible(false);
+
+			} else if (page.equals("Admin Homepage")) {
+				stay = true;
+				if (!ahs.getData())
+					break;
+				if (!stay) {
+					setVisible(false);
+					page = "";
+					break;
+				}
+				setVisible(true);
+				while (stay) {
+					g.setColor(Color.DARK_GRAY);
+					g.fillRect(0, 0, WIDTH, HEIGHT);
+					ahs.draw_page(g);
+					this.getGraphics().drawImage(img, 9, 38, null);
+					try {
+						Thread.sleep(30);
+					} catch (Exception e) {
+					}
+					;
+				}
+				setVisible(false);
 			}else{
 				System.out.println("How did you even get here?");
 			}
@@ -183,6 +230,18 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 	public void keyPressed(KeyEvent e) {
 		if(e.getKeyCode() == KeyEvent.VK_ESCAPE)
 			stay = false;
+		//To be fixed later
+		else if (admin && e.getKeyCode() == KeyEvent.VK_N)
+			ahs.requestInsert();
+		else if (admin && e.getKeyCode() == KeyEvent.VK_E)
+			ahs.requestUpdate();
+		else if (admin && e.getKeyCode() == KeyEvent.VK_R)
+			ahs.requestDelete();
+		else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+			ahs.decrementPage();
+		} else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+			ahs.incrementPage();
+		}
 	}
 	public void keyReleased(KeyEvent e) {}
 	public void keyTyped(KeyEvent e) {}

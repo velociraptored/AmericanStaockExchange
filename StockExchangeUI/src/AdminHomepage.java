@@ -1,5 +1,7 @@
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -7,51 +9,139 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 
+import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
 public class AdminHomepage {
 	public Frame f;
-	
+
 	private String Username;
 	private String FName;
 	private String MID;
 	private String LName;
-	
+	private JButton AddUserButton = new JButton();
+	private JButton EditUserButton = new JButton();
+	private JButton DeleteUserButton = new JButton();
+	private int page = 1;
+	private int lastPage = 0;
+	private Graphics gr;
 	ArrayList<ArrayList<String>> listUsers = new ArrayList<ArrayList<String>>();
 
-	
 	public AdminHomepage(Frame fr) {
 		this.f = fr;
 	}
-	
+
 	public void draw_page(Graphics g) {
+		gr = g;
 		g.setColor(Color.LIGHT_GRAY);
 		g.fillRect(0, Frame.border, Frame.WIDTH, Frame.HEIGHT - Frame.border);
-
+		
 		g.setFont(f.title);
-		g.drawString(FName + " " + MID + " " + LName, 20, 40);
+		g.drawString("Users", 20, 40);
+		
+		g.drawString(FName + " " + MID + " " + LName, Frame.WIDTH/2, 40);
 
-		// g.setFont(f.title);
-		// g.drawRect(Frame.WIDTH - 330, 320, 300, 210);
-		// g.drawString(Email, Frame.WIDTH - 330 + 10, 360);
+		g.setColor(Color.DARK_GRAY);
 		g.setFont(f.text);
+
+		AddUserButton.setText("Add User");
+		EditUserButton.setText("Edit User");
+		DeleteUserButton.setText("Delete User");
+
+		AddUserButton.addMouseListener(new MouseListener() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				requestInsert();
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent arg0) {
+			}
+
+			@Override
+			public void mouseExited(MouseEvent arg0) {
+			}
+
+			@Override
+			public void mousePressed(MouseEvent arg0) {
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent arg0) {
+			}
+		});
+
+		EditUserButton.addMouseListener(new MouseListener() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				requestUpdate();
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent arg0) {
+			}
+
+			@Override
+			public void mouseExited(MouseEvent arg0) {
+			}
+
+			@Override
+			public void mousePressed(MouseEvent arg0) {
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent arg0) {
+			}
+		});
+
+		DeleteUserButton.addMouseListener(new MouseListener() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				requestDelete();
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent arg0) {
+			}
+
+			@Override
+			public void mouseExited(MouseEvent arg0) {
+			}
+
+			@Override
+			public void mousePressed(MouseEvent arg0) {
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent arg0) {
+			}
+		});
+
 		if (listUsers.size() > 0) {
-			g.setFont(f.title);
-			g.drawString("Users", Frame.WIDTH - 450, 380);
 			g.setFont(f.text);
 			// g.drawLine(x1, y1, x2, y2);
-			for (int i = 0; i < listUsers.size(); i++) {
-				g.drawString(listUsers.get(i).get(0), Frame.WIDTH - 650, 420 + 25 * i);
-				g.drawString(listUsers.get(i).get(1), Frame.WIDTH - 600, 420 + 25 * i);
-				g.drawString(listUsers.get(i).get(2), Frame.WIDTH - 500, 420 + 25 * i);
-				g.drawString(listUsers.get(i).get(3), Frame.WIDTH - 450, 420 + 25 * i);
-				g.drawString(listUsers.get(i).get(4), Frame.WIDTH - 400, 420 + 25 * i);
-				g.drawString(listUsers.get(i).get(5), Frame.WIDTH - 350, 420 + 25 * i);
+			if (listUsers.size() > 15) {
+				lastPage = (int) Math.ceil((listUsers.size() / 15));
+				for (int i = 0; i < Math.min(15, listUsers.size() - 15 * (page - 1)); i++) {
+					g.drawString(listUsers.get(i + (page - 1) * 15).get(0), Frame.WIDTH - 650, 120 + 25 * i);
+					g.drawString(listUsers.get(i + (page - 1) * 15).get(1), Frame.WIDTH - 550, 120 + 25 * i);
+					g.drawString(listUsers.get(i + (page - 1) * 15).get(2), Frame.WIDTH - 450, 120 + 25 * i);
+					g.drawString(listUsers.get(i + (page - 1) * 15).get(3), Frame.WIDTH - 400, 120 + 25 * i);
+					g.drawString(listUsers.get(i + (page - 1) * 15).get(4), Frame.WIDTH - 300, 120 + 25 * i);
+				}
+			} else {
+				for (int i = 0; i < listUsers.size(); i++) {
+					g.drawString(listUsers.get(i).get(0), Frame.WIDTH - 650, 120 + 25 * i);
+					g.drawString(listUsers.get(i).get(1), Frame.WIDTH - 550, 120 + 25 * i);
+					g.drawString(listUsers.get(i).get(2), Frame.WIDTH - 450, 120 + 25 * i);
+					g.drawString(listUsers.get(i).get(3), Frame.WIDTH - 400, 120 + 25 * i);
+					g.drawString(listUsers.get(i).get(4), Frame.WIDTH - 300, 120 + 25 * i);
+				}
 			}
 		}
 	}
-	
+
 	public boolean getData() {
 		Username = Main.username;
 		try {
@@ -80,7 +170,7 @@ public class AdminHomepage {
 				users.add(rs.getString("MID"));
 				users.add(rs.getString("LName"));
 				users.add(rs.getString("Email"));
-				users.add(""+rs.getInt("NetGain"));
+				users.add("" + rs.getInt("NetGain"));
 				listUsers.add(users);
 			}
 		} catch (SQLException ex) {
@@ -172,7 +262,7 @@ public class AdminHomepage {
 	public void requestDelete() {
 		JTextField f1 = new JTextField();
 		JTextField f2 = new JTextField();
-		Object[] message = { "Username:", f1, "Password", f2};
+		Object[] message = { "Username:", f1, "Password", f2 };
 		int option = JOptionPane.showConfirmDialog(null, message, "Delete User Data.", JOptionPane.OK_CANCEL_OPTION);
 		if (option == JOptionPane.OK_OPTION)
 			deleteUser(f1.getText(), f2.getText());
@@ -196,6 +286,19 @@ public class AdminHomepage {
 		} catch (SQLException ex) {
 			JOptionPane.showMessageDialog(null, "Failed to run query.");
 			ex.printStackTrace();
-		}		
+		}
 	}
+		
+	public void decrementPage(){
+		if (page > 1)
+			page--;
+		draw_page(gr);
+	}
+	
+	public void incrementPage(){
+		if (page < lastPage)
+			page++;
+		draw_page(gr);
+	}
+	
 }
