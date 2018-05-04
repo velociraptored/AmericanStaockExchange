@@ -23,9 +23,11 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 	// Database variables and services
 	public DBConnection DBCon;
 	private CompanyService cs;
+	private IndexService is;
 	private Broker broker;
 	private UserDetailsService ds;
 	private CompanyAdminPage cas;
+	private IndexAdminPage ias;
 	//private AdminHomePage adminService;
 	
 	private Page current_page = null;
@@ -69,18 +71,20 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 
 		// Instantiate new pages
 		cs = new CompanyService(this);
+		is = new IndexService(this);
 		broker=new Broker(this);
 		cas = new CompanyAdminPage(this);
+		ias = new IndexAdminPage(this);
 	}
 
 	// Framestate management
 	public void run(){
 		String[] names = {};
 		if(admin){
-			String[] temp = {"Company data","Manage Company Data","Broker"};
+			String[] temp = {"Company data","Index data","Manage Company Data","Manage Index Data","Broker"};
 			names = temp;
 		}else{
-			String[] temp = {"Company data","Broker"};
+			String[] temp = {"Company data","Index data","Broker"};
 			names = temp;
 		}
 		while(true){
@@ -115,6 +119,21 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 					}
 					setVisible(false);
 				}
+			}else if(page.equals("Index data")){
+				while(true){
+					stay = true;
+					if(!is.getData())
+						break;
+					setVisible(true);
+					while(stay){
+						g.setColor(Color.DARK_GRAY);
+						g.fillRect(0, 0, WIDTH, HEIGHT);
+						is.draw_page(g);
+						this.getGraphics().drawImage(img, 9, 38, null);
+						try{Thread.sleep(30);}catch(Exception e){};
+					}
+					setVisible(false);
+				}
 			}else if(page.equals("Broker")){
 				stay = true;
 				setVisible(true);
@@ -140,6 +159,20 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 				}
 				current_page = null;
 				setVisible(false);
+			}else if(page.equals("Manage Index Data")){
+				stay = true;
+				setVisible(true);
+				current_page = ias;
+				ias.getIndexData();
+				while(stay){
+					g.setColor(Color.DARK_GRAY);
+					g.fillRect(0, 0, WIDTH, HEIGHT);
+					ias.draw_page(g);
+					this.getGraphics().drawImage(img, 9, 38, null);
+					try{Thread.sleep(30);}catch(Exception e){};
+				}
+				current_page = null;
+				setVisible(false);
 			}else{
 				System.out.println("How did you even get here?");
 			}
@@ -150,12 +183,6 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 	public void keyPressed(KeyEvent e) {
 		if(e.getKeyCode() == KeyEvent.VK_ESCAPE)
 			stay = false;
-		else if(admin && e.getKeyCode() == KeyEvent.VK_I)
-			cs.requestInsert();
-		else if(admin && e.getKeyCode() == KeyEvent.VK_U)
-			cs.requestUpdate();
-		else if(admin && e.getKeyCode() == KeyEvent.VK_D)
-			cs.requestDelete();
 	}
 	public void keyReleased(KeyEvent e) {}
 	public void keyTyped(KeyEvent e) {}

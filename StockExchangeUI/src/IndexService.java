@@ -11,26 +11,25 @@ import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 
-public class CompanyService {
+public class IndexService {
 	private Frame f;
 	
-	private String CompanyName;
-	private String Abbreviation;
-	private String CompanyCountry;
-	private String CompanyIndustry;
-	private String CompanyFounding;
-	private int CompanyNumber, inx;
+	private String IndexName;
+	private String IndexSize;
+	private String IndexCountry;
+	private int IndexID, inx, IndexNum;
 	private ArrayList<Date> OpenDate = new ArrayList<Date>();
 	private ArrayList<Double> OpenPrice = new ArrayList<Double>(),
 			HighPrice = new ArrayList<Double>(),
 			LowPrice = new ArrayList<Double>(),
 			ClosePrice = new ArrayList<Double>(),
-			AdjClose = new ArrayList<Double>();
+			AdjClose = new ArrayList<Double>(),
+			ChangeRate = new ArrayList<Double>();
 	private ArrayList<Integer> Volume = new ArrayList<Integer>();
 	private double MaxVal, MinVal;
-	private ArrayList<ArrayList<String>> CompanyData;
+	private ArrayList<ArrayList<String>> IndexData;
 	
-	public CompanyService(Frame fr){
+	public IndexService(Frame fr){
 		f = fr;
 	}
 	
@@ -39,7 +38,7 @@ public class CompanyService {
 		g.fillRect(0, Frame.border, Frame.WIDTH, Frame.HEIGHT-Frame.border);
 
 		g.setFont(f.title);
-		g.drawString(CompanyName+" ("+Abbreviation+")", 20, 40);
+		g.drawString(IndexName, 20, 40);
 
 		int gx = 30, gy = 90;
 		int gw = 300, gh = 200;
@@ -51,14 +50,10 @@ public class CompanyService {
 			g.drawLine(gx,gy,gx+gw,gy+gh);
 		}
 
-		g.setFont(f.title);
-		g.drawRect(Frame.WIDTH-330, 320, 300, 210);
-		g.drawString(CompanyName, Frame.WIDTH-330+10, 360);
+		g.drawRect(30, 455, 560, 60);
 		g.setFont(f.text);
-		g.drawString(Abbreviation, Frame.WIDTH-330+10, 400);
-		g.drawString(CompanyCountry, Frame.WIDTH-330+10, 430);
-		g.drawString(CompanyIndustry, Frame.WIDTH-330+10, 460);
-		g.drawString("Since "+CompanyFounding, Frame.WIDTH-330+10, 490);
+		g.drawString("Total Number of Stocks: "+IndexSize, 33, 480);
+		g.drawString("Country: "+IndexCountry, 33, 505);
 	}
 	
 	public void drawGraph(int x, int y, int w, int h, Graphics g){
@@ -86,39 +81,38 @@ public class CompanyService {
 
 		g.drawLine(x+inx, y, x+inx, y+h+30);
 		g.drawLine(x, yy, x+w+30, yy);
-		g.drawRect(x+w+30, yy-15, 80, 30);
+		g.drawRect(x+w+30, yy-15, 100, 30);
 
-		g.drawRect(x, y+h+30, w, 210);
+		g.drawRect(x, y+h+30, w*2-40, 125);
 		g.drawString("Date: "+OpenDate.get(index),			x+3, y+h+52);
 		g.drawString("Open Price: "+OpenPrice.get(index), 	x+3, y+h+82);
 		g.drawString("High Price: "+HighPrice.get(index), 	x+3, y+h+112);
 		g.drawString("Low Price: "+LowPrice.get(index), 	x+3, y+h+142);
-		g.drawString("Close Price: "+ClosePrice.get(index), x+3, y+h+172);
-		g.drawString("Adj Close: "+AdjClose.get(index), 	x+3, y+h+202);
-		g.drawString("Volume: "+Volume.get(index), 			x+3, y+h+232);
+		g.drawString("Close Price: "+ClosePrice.get(index), x+250, y+h+52);
+		g.drawString("Adj Close: "+AdjClose.get(index), 	x+250, y+h+82);
+		g.drawString("Volume: "+Volume.get(index), 			x+250, y+h+112);
+		g.drawString("Change Rate: "+ChangeRate.get(index), x+250, y+h+142);
 	}
 	
-	public void getCompanyData(){
+	public void getIndexData(){
 		try{
-			String sqlStatement = "SELECT * FROM Company";
+			String sqlStatement = "SELECT * FROM [Index]";
 			PreparedStatement proc = f.DBCon.getConnection().prepareStatement(sqlStatement);
 			ResultSet rs = proc.executeQuery();
-			int AbbrIndex = rs.findColumn("Abbreviation");
-			int NameIndex = rs.findColumn("Name");
+			int IDIndex   = rs.findColumn("IndexID");
+			int NameIndex = rs.findColumn("IndexName");
+			int SizeIndex = rs.findColumn("TotalNumberOfStocks");
 			int CtryIndex = rs.findColumn("Country");
-			int IndsIndex = rs.findColumn("Industry");
-			int YearIndex = rs.findColumn("Year");
 			ArrayList<ArrayList<String>> ret = new ArrayList<ArrayList<String>>();
 			while(rs.next()){
-				ArrayList<String> company = new ArrayList<String>();
-				company.add(rs.getString(AbbrIndex));
-				company.add(rs.getString(NameIndex));
-				company.add(rs.getString(CtryIndex));
-				company.add(rs.getString(IndsIndex));
-				company.add(rs.getString(YearIndex));
-				ret.add(company);
+				ArrayList<String> index = new ArrayList<String>();
+				index.add(rs.getString(IDIndex));
+				index.add(rs.getString(NameIndex));
+				index.add(rs.getString(SizeIndex));
+				index.add(rs.getString(CtryIndex));
+				ret.add(index);
 			}
-			CompanyData = ret;
+			IndexData = ret;
 		}catch(SQLException ex){
 			JOptionPane.showMessageDialog(null, "Failed to fetch company data.");
 			ex.printStackTrace();
@@ -126,31 +120,30 @@ public class CompanyService {
 	}
 	
 	public boolean getData(){
-		getCompanyData();
-		String[] names = new String[CompanyData.size()];
-		for(int i = 0; i < CompanyData.size(); i++)
-			names[i] = CompanyData.get(i).get(1)+" ("+CompanyData.get(i).get(0)+")";
-		String s = (String) JOptionPane.showInputDialog(null, "Choose a company to view.",
-				"Company Selection", JOptionPane.QUESTION_MESSAGE, null, names, names[0]);
+		getIndexData();
+		String[] names = new String[IndexData.size()];
+		for(int i = 0; i < IndexData.size(); i++)
+			names[i] = IndexData.get(i).get(1);
+		String s = (String) JOptionPane.showInputDialog(null, "Choose an index to view.",
+				"Index Selection", JOptionPane.QUESTION_MESSAGE, null, names, names[0]);
 		if(s == null){
 			return false;
 		}
-		Abbreviation = s.substring(s.indexOf('(')+1, s.indexOf(')'));
-		for(int i = 0; i < CompanyData.size(); i++)
-			if(CompanyData.get(i).get(0).equals(Abbreviation)){
-				CompanyNumber = i;
+		for(int i = 0; i < IndexData.size(); i++)
+			if(s.equals(IndexData.get(i).get(1))) {
+				IndexNum = i;
 				break;
 			}
-		CompanyName = CompanyData.get(CompanyNumber).get(1);
-		CompanyCountry = CompanyData.get(CompanyNumber).get(2);
-		CompanyIndustry = CompanyData.get(CompanyNumber).get(3);
-		CompanyFounding = CompanyData.get(CompanyNumber).get(4);
+		IndexID = Integer.parseInt(IndexData.get(IndexNum).get(0));
+		IndexName = IndexData.get(IndexNum).get(1);
+		IndexSize = IndexData.get(IndexNum).get(2);
+		IndexCountry = IndexData.get(IndexNum).get(3);
 
 		try{
-			String sqlStatement = "{ ? = call GetStockHistory(?) }";
+			String sqlStatement = "{ ? = call GetIndexHistory(?) }";
 			CallableStatement proc = f.DBCon.getConnection().prepareCall(sqlStatement);
 			proc.registerOutParameter(1, Types.INTEGER);
-			proc.setString(2, Abbreviation);
+			proc.setInt(2, IndexID);
 			proc.execute();
 			ResultSet rs = proc.getResultSet();
 
@@ -161,10 +154,11 @@ public class CompanyService {
 			ClosePrice.clear();
 			AdjClose.clear();
 			Volume.clear();
+			ChangeRate.clear();
 			if(rs == null){
 				int ret = proc.getInt(1);
 				if(ret == 1)
-					JOptionPane.showMessageDialog(null,"ERROR: Company does not exist");
+					JOptionPane.showMessageDialog(null,"ERROR: Index does not exist");
 			}else{
 				MinVal = Double.MAX_VALUE;
 				MaxVal = Double.MIN_VALUE;
@@ -175,6 +169,7 @@ public class CompanyService {
 				int CPI = rs.findColumn("ClosePrice");
 				int ACI = rs.findColumn("AdjClose");
 				int VI = rs.findColumn("Volume");
+				int CRI = rs.findColumn("ChangeRate");
 				double val;
 				while(rs.next()){
 					OpenDate.add(rs.getDate(ODI));
@@ -194,6 +189,7 @@ public class CompanyService {
 					ClosePrice.add(val);
 					AdjClose.add(rs.getDouble(ACI));
 					Volume.add(rs.getInt(VI));
+					ChangeRate.add(rs.getDouble(CRI));
 				}
 			}
 		}catch(SQLException ex){
