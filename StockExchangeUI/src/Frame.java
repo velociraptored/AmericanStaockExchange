@@ -25,6 +25,7 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 	private CompanyService cs;
 	private Broker broker;
 	private UserDetailsService ds;
+	private CompanyAdminPage cas;
 
 	// User interface variables
 	public Font title = new Font("Candara", 0, 40);
@@ -62,13 +63,23 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 			}
 		};
 		Runtime.getRuntime().addShutdownHook(new Thread(r));
+
+		// Instantiate new pages
 		cs = new CompanyService(this);
 		broker=new Broker(this);
+		cas = new CompanyAdminPage(this);
 	}
 
 	// Framestate management
 	public void run(){
-		String[] names = {"Company data","Test","Broker"};
+		String[] names = {};
+		if(admin){
+			String[] temp = {"Company data","Manage Company Data","Broker"};
+			names = temp;
+		}else{
+			String[] temp = {"Company data","Broker"};
+			names = temp;
+		}
 		while(true){
 			String page = (String) JOptionPane.showInputDialog(null, "Select page to view.", 
 					"View Selection", JOptionPane.QUESTION_MESSAGE, null, names, names[0]);
@@ -102,21 +113,29 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 					setVisible(false);
 				}
 			}else if(page.equals("Broker")){
-				while(true){
-					stay = true;
-					setVisible(true);
-					while(stay){
-						g.setColor(Color.DARK_GRAY);
-						g.fillRect(0, 0, WIDTH, HEIGHT);
-						broker.draw_page(g);
-						this.getGraphics().drawImage(img, 9, 38, null);
-						try{Thread.sleep(30);}catch(Exception e){};
-					}
-					setVisible(false);
+				stay = true;
+				setVisible(true);
+				while(stay){
+					g.setColor(Color.DARK_GRAY);
+					g.fillRect(0, 0, WIDTH, HEIGHT);
+					broker.draw_page(g);
+					this.getGraphics().drawImage(img, 9, 38, null);
+					try{Thread.sleep(30);}catch(Exception e){};
 				}
-				
-			}
-			else{
+				setVisible(false);
+			}else if(page.equals("Manage Company Data")){
+				stay = true;
+				setVisible(true);
+				cas.getCompanyData();
+				while(stay){
+					g.setColor(Color.DARK_GRAY);
+					g.fillRect(0, 0, WIDTH, HEIGHT);
+					cas.draw_page(g);
+					this.getGraphics().drawImage(img, 9, 38, null);
+					try{Thread.sleep(30);}catch(Exception e){};
+				}
+				setVisible(false);
+			}else{
 				System.out.println("How did you even get here?");
 			}
 		}
