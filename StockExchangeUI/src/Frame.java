@@ -26,9 +26,7 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 	private Broker broker;
 	private UserDetailsService ds;
 	private CompanyAdminPage cas;
-	//private AdminHomePage adminService;
-	
-	private Page current_page = null;
+	private Transaction transact;
 
 	// User interface variables
 	public Font title = new Font("Candara", 0, 40);
@@ -69,6 +67,7 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 
 		// Instantiate new pages
 		cs = new CompanyService(this);
+		transact = new Transaction(this);
 		broker=new Broker(this);
 		cas = new CompanyAdminPage(this);
 	}
@@ -77,7 +76,7 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 	public void run(){
 		String[] names = {};
 		if(admin){
-			String[] temp = {"Company data","Manage Company Data","Broker"};
+			String[] temp = {"Company data","Manage Company Data","Broker", "Transactions"};
 			names = temp;
 		}else{
 			String[] temp = {"Company data","Broker"};
@@ -126,10 +125,22 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 					try{Thread.sleep(30);}catch(Exception e){};
 				}
 				setVisible(false);
-			}else if(page.equals("Manage Company Data")){
+			} else if(page.equals("Transactions")){
+				stay = true;
+				if(!transact.getData())
+					break;
+				setVisible(true);
+				while(stay){
+					g.setColor(Color.DARK_GRAY);
+					g.fillRect(0, 0, WIDTH, HEIGHT);
+					transact.draw_page(g);
+					this.getGraphics().drawImage(img, 9, 38, null);
+					try{Thread.sleep(30);}catch(Exception e){};
+				}
+				setVisible(false);
+			} else if(page.equals("Manage Company Data")){
 				stay = true;
 				setVisible(true);
-				current_page = cas;
 				cas.getCompanyData();
 				while(stay){
 					g.setColor(Color.DARK_GRAY);
@@ -138,7 +149,6 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 					this.getGraphics().drawImage(img, 9, 38, null);
 					try{Thread.sleep(30);}catch(Exception e){};
 				}
-				current_page = null;
 				setVisible(false);
 			}else{
 				System.out.println("How did you even get here?");
@@ -162,10 +172,7 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 	public void mouseClicked(MouseEvent e) {}
 	public void mouseEntered(MouseEvent e) {}
 	public void mouseExited(MouseEvent e) {}
-	public void mousePressed(MouseEvent e) {
-		if(current_page != null)
-			current_page.click(mx, my);
-	}
+	public void mousePressed(MouseEvent e) {}
 	public void mouseReleased(MouseEvent e) {}
 	public void mouseDragged(MouseEvent e) {}
 	public void mouseMoved(MouseEvent e) {
