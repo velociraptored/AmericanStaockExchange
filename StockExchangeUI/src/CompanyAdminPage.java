@@ -11,11 +11,11 @@ import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
-public class CompanyAdminPage {
+public class CompanyAdminPage extends Page{
 	private Frame f;
 	private ArrayList<String> CompanyNames, CompanyAbbreviations, CompanyCountries, CompanyIndustries;
 	private ArrayList<Integer> CompanyYears;
-	private int page = 0, num_pages = 0;
+	private int page = 0, num_pages;
 
 	public CompanyAdminPage(Frame fr){f = fr;}
 
@@ -26,19 +26,37 @@ public class CompanyAdminPage {
 		g.setFont(f.title);
 		g.drawString("Manage Companies", 20, 40);
 
-		g.setColor(Color.DARK_GRAY);
-		g.setFont(f.text);
-		g.fillRect(10, Frame.border+15, 20, 20);
-		g.fillRect(168, Frame.border+15, 20, 20);
-		g.drawString("Page "+page+" out of "+num_pages, 35, 90);
-		
-		for(int i = 0; i < 10 && i+10*page < CompanyNames.size(); i++) {
-			g.drawRect(10, Frame.border+10, Frame.WIDTH-20, 50);
+		if(page > 0) {
+			g.setColor(Color.DARK_GRAY);
+			g.fillRect(10, Frame.border+15, 20, 20);
+			g.setColor(Color.LIGHT_GRAY);
+			drawTriangle(10, Frame.border+15, false, g);
+		}
+		if(page < num_pages - 1) {
+			g.setColor(Color.DARK_GRAY);
+			g.fillRect(168, Frame.border+15, 20, 20);
+			g.setColor(Color.LIGHT_GRAY);
+			drawTriangle(168, Frame.border+15, true, g);
 		}
 
+		g.setColor(Color.DARK_GRAY);
+		g.setFont(f.text);
+		g.drawString("Page "+(page+1)+" out of "+num_pages, 35, 90);
+
+		g.fillRect(500, Frame.border+10, 150, 30);
 		g.setColor(Color.LIGHT_GRAY);
-		drawTriangle(10, Frame.border+15, true, g);
-		drawTriangle(168, Frame.border+15, false, g);
+		g.drawString("Add Company", 513, Frame.border+30);
+
+		for(int i = 0; i < 8 && i+8*page < CompanyNames.size(); i++) {
+			g.setColor(Color.DARK_GRAY);
+			g.drawRect(10, Frame.border+60+50*i, Frame.WIDTH-20, 50);
+			g.drawString(CompanyNames.get(i+8*page)+" ("+CompanyAbbreviations.get(i+8*page)+")", 35, Frame.border+90+50*i);
+			g.fillRect(480, Frame.border+70+50*i, 70, 30);
+			g.fillRect(560, Frame.border+70+50*i, 90, 30);
+			g.setColor(Color.LIGHT_GRAY);
+			g.drawString("Edit", 498, Frame.border+90+50*i);
+			g.drawString("Delete", 575, Frame.border+90+50*i);
+		}
 	}
 
 	public void drawTriangle(int x, int y, boolean up, Graphics g){
@@ -69,8 +87,8 @@ public class CompanyAdminPage {
 			int IndsIndex = rs.findColumn("Industry");
 			int YearIndex = rs.findColumn("Year");
 			while(rs.next()){
-				CompanyNames.add(rs.getString(AbbrIndex));
-				CompanyAbbreviations.add(rs.getString(NameIndex));
+				CompanyAbbreviations.add(rs.getString(AbbrIndex));
+				CompanyNames.add(rs.getString(NameIndex));
 				CompanyCountries.add(rs.getString(CtryIndex));
 				CompanyIndustries.add(rs.getString(IndsIndex));
 				CompanyYears.add(rs.getInt(YearIndex));
@@ -79,6 +97,31 @@ public class CompanyAdminPage {
 			JOptionPane.showMessageDialog(null, "Failed to fetch company data.");
 			ex.printStackTrace();
 		}
+		num_pages = CompanyNames.size()/8;
+		if(CompanyNames.size() % 8 != 0)
+			num_pages++;
+	}
+
+	public void click(int x, int y){
+		if(page > 0 && in(10, Frame.border+15, 20, 20, x, y))
+			page--;
+		else if(page < num_pages - 1 && in(168, Frame.border+15, 20, 20, x, y))
+			page++;
+		else if(in(500, Frame.border+10, 150, 30, x, y))
+			requestInsert();
+		for(int i = 0; i < 8 && i+8*page < CompanyNames.size(); i++){
+			if(in(480, Frame.border+70+50*i, 70, 30, x, y))
+				requestUpdate(i+8*page);
+			if(in(560, Frame.border+70+50*i, 90, 30, x, y))
+				requestDelete(i+8*page);
+		}
+	}
+	public boolean in(int bx, int by, int bw, int bh, int x, int y) {
+		if(x < bx || x > bx + bw)
+			return false;
+		if(y < by || y > by + bh)
+			return false;
+		return true;
 	}
 
 	// Database Write Operations
@@ -96,34 +139,47 @@ public class CompanyAdminPage {
 				"Year:", f5,
 		};
 		int option = JOptionPane.showConfirmDialog(null, message, "Insert Company Data.", JOptionPane.OK_CANCEL_OPTION);
-		if (option == JOptionPane.OK_OPTION)
-			insertCompany(f2.getText(),f1.getText(),f3.getText(),f4.getText(),Integer.parseInt(f5.getText()));
+		if (option == JOptionPane.OK_OPTION){
+			try{
+				insertCompany(f2.getText(),f1.getText(),f3.getText(),f4.getText(),Integer.parseInt(f5.getText()));
+			}catch(NumberFormatException e){
+				JOptionPane.showMessageDialog(null, "Year must be an integer.");
+			}
+			getCompanyData();
+		}
 	}
-	public void requestUpdate(){
+	public void requestUpdate(int index){
+		if(index >= CompanyNames.size())
+			return;
+		String abbr = CompanyAbbreviations.get(index);
 		JTextField f1 = new JTextField();
 		JTextField f2 = new JTextField();
 		JTextField f3 = new JTextField();
 		JTextField f4 = new JTextField();
-		JTextField f5 = new JTextField();
 		Object[] message = {
-				"Abbreviation:", f1,
-				"Company Name:", f2,
-				"Country:", f3,
-				"Industry:", f4,
-				"Year:", f5,
+				"Company Name:", f1,
+				"Country:", f2,
+				"Industry:", f3,
+				"Year:", f4,
 		};
-		int option = JOptionPane.showConfirmDialog(null, message, "Update Company Data.", JOptionPane.OK_CANCEL_OPTION);
-		if (option == JOptionPane.OK_OPTION)
-			updateCompany(f1.getText(),f2.getText(),f3.getText(),f4.getText(),f5.getText());
+		f1.setText(CompanyNames.get(index));
+		f2.setText(CompanyCountries.get(index));
+		f3.setText(CompanyIndustries.get(index));
+		f4.setText(""+CompanyYears.get(index));
+		int option = JOptionPane.showConfirmDialog(null, message, "Update "+abbr+" Data.", JOptionPane.OK_CANCEL_OPTION);
+		if (option == JOptionPane.OK_OPTION){
+			updateCompany(abbr,f1.getText(),f2.getText(),f3.getText(),f4.getText());
+			getCompanyData();
+		}
 	}
-	public void requestDelete(){
-		String[] names = new String[CompanyNames.size()];
-		for(int i = 0; i < CompanyNames.size(); i++)
-			names[i] = CompanyNames.get(i)+" ("+CompanyAbbreviations.get(i)+")";
-		String s = (String) JOptionPane.showInputDialog(null, "Delete Company Data.",
-				"Company Selection", JOptionPane.QUESTION_MESSAGE, null, names, names[0]);
-		if (s != null && s.length() > 0)
-			deleteCompany(s.substring(s.indexOf('(')+1, s.indexOf(')')));
+	public void requestDelete(int index){
+		if(index >= CompanyNames.size())
+			return;
+		int ret = JOptionPane.showConfirmDialog(null, "Delete "+CompanyAbbreviations.get(index)+"?", "CompanyDeletion", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+		if(ret == JOptionPane.OK_OPTION){
+			deleteCompany(CompanyAbbreviations.get(index));
+			getCompanyData();
+		}
 	}
 	public void insertCompany(String Abb, String Nm, String cty, String ind, int year){
 		try{
@@ -179,14 +235,14 @@ public class CompanyAdminPage {
 
 			int status = proc.getInt(1);
 			if(status == 1){
-				JOptionPane.showMessageDialog(null,"ERROR: Company already exists in the database.");
+				JOptionPane.showMessageDialog(null,"ERROR: This company does not exist in the database.");
 			}else{
 				JOptionPane.showMessageDialog(null, "Company info updated.");
 			}
 		}catch(SQLException ex){
 			JOptionPane.showMessageDialog(null, "Failed to run query.");
 			ex.printStackTrace();
-		}catch(Exception ex){
+		}catch(NumberFormatException ex){
 			JOptionPane.showMessageDialog(null, "Year must be an integer.");
 		}
 	}
