@@ -29,7 +29,7 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 	private CompanyAdminPage cas;
 	private IndexAdminPage ias;
 	private AdminHomepage ahs;
-	
+	private Transaction transact;
 	private Page current_page = null;
 
 	// User interface variables
@@ -77,13 +77,14 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 		ias = new IndexAdminPage(this);
 		ds = new UserDetailsService(this);
 		ahs = new AdminHomepage(this);
+		transact = new Transaction(this);
 	}
 
 	// Framestate management
 	public void run(){
 		String[] names = {};
 		if(admin){
-			String[] temp = {"Company data","Index data","Manage Company Data","Manage Index Data","Broker", "Admin Homepage", "User Details"};
+			String[] temp = {"Company data","Index data","Manage Company Data","Manage Index Data","Broker", "Admin Homepage", "User Details", "Transactions"};
 			names = temp;
 		}else{
 			String[] temp = {"Company data","Index data","Broker", "User Details"};
@@ -220,7 +221,20 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 					;
 				}
 				setVisible(false);
-			}else{
+			} else if(page.equals("Transactions")){
+				stay = true;
+				if(!transact.getData())
+					break;
+				setVisible(true);
+				while(stay){
+					g.setColor(Color.DARK_GRAY);
+					g.fillRect(0, 0, WIDTH, HEIGHT);
+					transact.draw_page(g);
+					this.getGraphics().drawImage(img, 9, 38, null);
+					try{Thread.sleep(30);}catch(Exception e){};
+				}
+				setVisible(false);
+			} else{
 				System.out.println("How did you even get here?");
 			}
 		}

@@ -21,7 +21,7 @@ public class Transaction {
 	private int TransactionNumber;
 	private Frame f;
 	private ArrayList<ArrayList<String>> TransactionData;
-	
+	private String currUser;
 	public Transaction(Frame fr){
 		f = fr;
 	}
@@ -54,6 +54,7 @@ public class Transaction {
 			int Type =					rs.findColumn("Type");
 			int Price = 				rs.findColumn("Price");
 			int Quantity = 				rs.findColumn("Quantity");
+			int User = 					rs.findColumn("User");
 			ArrayList<ArrayList<String>> ret = new ArrayList<ArrayList<String>>();
 			while(rs.next()){
 				ArrayList<String> transaction = new ArrayList<String>();
@@ -63,6 +64,7 @@ public class Transaction {
 				transaction.add(rs.getString(Type));
 				transaction.add(rs.getString(Price));
 				transaction.add(rs.getString(Quantity));
+				transaction.add(rs.getString(User));
 				ret.add(transaction);
 			}
 			TransactionData = ret;
@@ -74,92 +76,41 @@ public class Transaction {
 	
 	public boolean getData(){
 		getTransactionData();
-		String[] names = new String[TransactionData.size()];
-		for(int i = 0; i < TransactionData.size(); i++){
-			/*"BUY 3 APPL stocks at $4/stock"*/
-			/*TODO: change stocks to stock if only 1 stock exchanged*/
-			names[i] = TransactionData.get(i).get(3)+" "+TransactionData.get(i).get(5)+" "+
-						TransactionData.get(i).get(2)+" stocks at $"+TransactionData.get(i).get(4)+
-						"/stock ";
-		}
-		String s;
-		if(names.length != 0){
-			s = (String) JOptionPane.showInputDialog(null, "Choose a transaction to view or edit.",
-				"Transaction Selection", JOptionPane.QUESTION_MESSAGE, null, names, names[0]);
-		} else {
-			s = null;
-			JOptionPane.showMessageDialog(null, "You haven't made any transactions yet.");
-		}
-		if(s == null){
-			return false;
-		}
-		/*TID = s.substring(s.indexOf('(')+1, s.indexOf(')'));
-		for(int i = 0; i < TransactionData.size(); i++)
-			if(TransactionData.get(i).get(0).equals(TID)){
-				TransactionNumber = i;
-				break;
-			}//does this work for tid?
-		TimeStamp = TransactionData.get(TransactionNumber).get(1);
-		CompanyAbbreviation = TransactionData.get(TransactionNumber).get(2);
-		Type = TransactionData.get(TransactionNumber).get(3);
-		Price = TransactionData.get(TransactionNumber).get(4);
-		Quantity = TransactionData.get(TransactionNumber).get(5);*/
-
-		/*try{
-			String sqlStatement = "{ ? = call GetStockHistory(?) }";
-			CallableStatement proc = f.DBCon.getConnection().prepareCall(sqlStatement);
-			proc.registerOutParameter(1, Types.INTEGER);
-			proc.setString(2, Abbreviation);
-			proc.execute();
-			ResultSet rs = proc.getResultSet();
-
-			OpenDate.clear();
-			OpenPrice.clear();
-			HighPrice.clear();
-			LowPrice.clear();
-			ClosePrice.clear();
-			AdjClose.clear();
-			Volume.clear();
-			if(rs == null){
-				int ret = proc.getInt(1);
-				if(ret == 1)
-					JOptionPane.showMessageDialog(null,"ERROR: Company does not exist");
-			}else{
-				MinVal = Double.MAX_VALUE;
-				MaxVal = Double.MIN_VALUE;
-				int ODI = rs.findColumn("OpenDate");
-				int OPI = rs.findColumn("OpenPrice");
-				int HPI = rs.findColumn("HighPrice");
-				int LPI = rs.findColumn("LowPrice");
-				int CPI = rs.findColumn("ClosePrice");
-				int ACI = rs.findColumn("AdjClose");
-				int VI = rs.findColumn("Volume");
-				double val;
-				while(rs.next()){
-					OpenDate.add(rs.getDate(ODI));
-					val = rs.getDouble(OPI);
-					if(val < MinVal)
-						MinVal = val;
-					if(val > MaxVal)
-						MaxVal = val;
-					OpenPrice.add(val);
-					HighPrice.add(rs.getDouble(HPI));
-					LowPrice.add(rs.getDouble(LPI));
-					val = rs.getDouble(CPI);
-					if(val < MinVal)
-						MinVal = val;
-					if(val > MaxVal)
-						MaxVal = val;
-					ClosePrice.add(val);
-					AdjClose.add(rs.getDouble(ACI));
-					Volume.add(rs.getInt(VI));
-				}
+		String[] ops = {"Insert", "Edit"};
+		String editInsert = (String) JOptionPane.showInputDialog(null, "Insert Or Edit",
+				"Insert or Edit", JOptionPane.QUESTION_MESSAGE, null, ops, ops[0]);
+		if(editInsert.equals("Edit")){
+			String[] names = new String[TransactionData.size()];
+			for(int i = 0; i < TransactionData.size(); i++){
+				/*"BUY 3 APPL stocks at $4/stock"*/
+				/*TODO: change stocks to stock if only 1 stock exchanged*/
+				names[i] = TransactionData.get(i).get(0)+": "+TransactionData.get(i).get(3)+" "+TransactionData.get(i).get(5)+" "+
+							TransactionData.get(i).get(2)+" stocks at $"+TransactionData.get(i).get(4)+
+							"/stock ";
 			}
-		}catch(SQLException ex){
-			JOptionPane.showMessageDialog(null, "Failed to run query.");
-			ex.printStackTrace();
-			return false;
-		}*/
+			String s;
+			if(names.length != 0){
+				s = (String) JOptionPane.showInputDialog(null, "Transaction Selection",
+					"Transaction Selection", JOptionPane.QUESTION_MESSAGE, null, names, names[0]);
+			} else {
+				s = null;
+				JOptionPane.showMessageDialog(null, "You haven't made any transactions yet.");
+			}
+			if(s == null){
+				return false;
+			}
+			String myTID = s.substring(s.indexOf('[')+1, s.indexOf(':'));
+			int currIndex;
+			for(int i = 0; i < TransactionData.size(); i++)
+				if(TransactionData.get(i).get(0).equals(myTID)){
+					currIndex = i;
+					break;
+				}
+			
+			requestUpdate(myTID);
+		} else {
+			requestInsert();
+		}
 		return true;
 	}
 	
@@ -180,7 +131,7 @@ public class Transaction {
 	}
 	
 	
-	/*public void requestUpdate(){
+	public void requestUpdate(String myTID){
 		JTextField f1 = new JTextField();
 		JTextField f2 = new JTextField();
 		JTextField f3 = new JTextField();
@@ -191,7 +142,12 @@ public class Transaction {
 				"Price:", f3,
 				"Quantity:", f4
 		};
-	}*/
+		int option = JOptionPane.showConfirmDialog(null, message, "Edit Transaction.", JOptionPane.OK_CANCEL_OPTION);
+		if (option == JOptionPane.OK_OPTION)
+			editTransaction(Integer.parseInt(myTID), f1.getText(), f2.getText(),Integer.parseInt(f3.getText()),Integer.parseInt(f4.getText()));
+		else 
+			getData();
+	}
 	
 	public void insertTransaction(String Abb, String Type, String Price, int Quantity){
 		try{
@@ -207,7 +163,7 @@ public class Transaction {
 
 			int status = proc.getInt(1);
 			if(status == 1){
-				JOptionPane.showMessageDialog(null,"ERROR: Company does not exist.");
+				JOptionPane.showMessageDialog(null,"ERROR: insert failed");
 			}else{
 				JOptionPane.showMessageDialog(null, "Transaction created.");
 			}
@@ -216,48 +172,29 @@ public class Transaction {
 			ex.printStackTrace();
 		}
 	}
-	/*public void updateCompany(String Abb, String Type, String Price, String Quantity){
-		int num = 1;
-		//TODO: make drop down for Company and Type
-		String base = "{ ? = call CreateTransaction(@User = " + Main.username + ",";
-		if(Abb.length()>0)
-			base = base + "@CompanyAbbreviation = ?,";
-		if(Type.length()>0)
-			base = base + "@Type = ?,";
-		if(Price.length()>0)
-			base = base + "@Price = ?,";
-		if(Quantity.length()>0)
-			base = base + "@Quantity = ?,";
-		base = base.substring(0, base.length()-1);
-		base = base + ") }";
+	
+	public void editTransaction(int TID, String CompanyAbbreviation, String Type, int Price, int Quantity ){
+
 		try{
-			String sqlStatement = base;
+			String sqlStatement = "{ ? = call EditTransaction(?,?,?,?,?) }";
 			CallableStatement proc = f.DBCon.getConnection().prepareCall(sqlStatement);
 			proc.registerOutParameter(1, Types.INTEGER);
-			proc.setString(2, Abb);
-			num = 3;
-			if(Abb.length()>0)
-				proc.setString(num++, Abb);
-			if(Type.length()>0)
-				proc.setString(num++, Type);
-			if(Price.length()>0)
-				proc.setString(num++, Price);//TODO: cast as money
-			if(Quantity.length()>0)
-				proc.setInt(num++, Integer.parseInt(Quantity));
+			proc.setInt(2, TID);
+			proc.setString(3, CompanyAbbreviation);
+			proc.setString(4, Type);
+			proc.setInt(5, Price);
+			proc.setInt(6, Quantity);
 			proc.execute();
-
 			int status = proc.getInt(1);
 			if(status == 1){
-				JOptionPane.showMessageDialog(null,"ERROR: Transaction already exists in the database.");
+				JOptionPane.showMessageDialog(null,"ERROR: insert failed");
 			}else{
-				JOptionPane.showMessageDialog(null, "Transcation info updated.");
+				JOptionPane.showMessageDialog(null, "Transaction created.");
 			}
 		}catch(SQLException ex){
 			JOptionPane.showMessageDialog(null, "Failed to run query.");
 			ex.printStackTrace();
-		}catch(Exception ex){
-			JOptionPane.showMessageDialog(null,
-					"Format: company (string), type (string), price (money), qauntity (int)");
 		}
-	}*/
+	}
+
 }
