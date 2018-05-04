@@ -1,13 +1,16 @@
 import java.awt.Color;
 import java.awt.Graphics;
+import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 
-public class Broker {
+public class Broker extends Page {
 	private Frame f;
 	private String Username;
 	private String BID;
@@ -129,5 +132,117 @@ public class Broker {
 		}
 		
 	}
+	
+	public void click(int x, int y){
+		if(in(600,160,60,20,x,y)){
+			fire();
+		}
+		if(Username==null){
+			for(int i=0;i<BrokerData.size();i++){
+				if(in(600, 240+i*40, 60, 20,x,y))
+					hire();
+			}
+		}else{
+			for(int i=0;i<BrokerPart.size();i++){
+				if(in(600, 240+i*40, 60, 20,x,y))
+					hire();
+			}
+		}
+		
+	}
+	public boolean in(int bx, int by, int bw, int bh, int x, int y) {
+		if(x < bx || x > bx + bw)
+			return false;
+		if(y < by || y > by + bh)
+			return false;
+		return true;
+	}
+	
+	public void hire(){
+		JTextField f1 = new JTextField();
+		JTextField f2 = new JTextField();
+		
+		Object[] message = {
+				"Username:", f1,
+				"BID:", f2,
+		};
+		int option = JOptionPane.showConfirmDialog(null, message, "Hire current broker", JOptionPane.OK_CANCEL_OPTION);
+		if (option == JOptionPane.OK_OPTION){
+			try{
+				hireBroker(f1.getText(),f2.getText());
+			}catch(NumberFormatException e){
+				JOptionPane.showMessageDialog(null, "Year must be an integer.");
+			}
+			getPartBroker();
+			getAllBroker();
+			getBrokerData();
+		} 
+		
+	}
+
+	public void fire(){
+		JTextField f1 = new JTextField();
+		JTextField f2 = new JTextField();
+		
+		Object[] message = {
+				"Username:", f1,
+				"BID:", f2,
+		};
+		int option = JOptionPane.showConfirmDialog(null, message, "Fire current broker", JOptionPane.OK_CANCEL_OPTION);
+		if (option == JOptionPane.OK_OPTION){
+			try{
+				fireBroker(f1.getText(),f2.getText());
+			}catch(NumberFormatException e){
+				JOptionPane.showMessageDialog(null, "Year must be an integer.");
+			}
+			getPartBroker();
+			getAllBroker();
+			getBrokerData();
+		}
+		
+	}
+	
+	public void hireBroker(String Username,String BID){
+		try{
+			String sqlStatement = "{ ? = call HireBroker(?,?) }";
+			CallableStatement proc = f.DBCon.getConnection().prepareCall(sqlStatement);
+			proc.registerOutParameter(1, Types.INTEGER);
+			proc.setString(2, Username);
+			proc.setString(3, BID);
+			proc.execute();
+
+			int status = proc.getInt(1);
+			if(status == 1){
+				JOptionPane.showMessageDialog(null,"ERROR: Broker already hired in the database.");
+			}else{
+				JOptionPane.showMessageDialog(null, "Broker hired.");
+			}
+		}catch(SQLException ex){
+			JOptionPane.showMessageDialog(null, "Failed to run query.");
+			ex.printStackTrace();
+		}
+	}
+	
+	public void fireBroker(String Username,String BID){
+		try{
+			String sqlStatement = "{ ? = call FireBroker(?,?) }";
+			CallableStatement proc = f.DBCon.getConnection().prepareCall(sqlStatement);
+			proc.registerOutParameter(1, Types.INTEGER);
+			proc.setString(2, Username);
+			proc.setString(3, BID);
+			proc.execute();
+
+			int status = proc.getInt(1);
+			if(status == 1){
+				JOptionPane.showMessageDialog(null,"ERROR: Broker already fired in the database.");
+			}else{
+				JOptionPane.showMessageDialog(null, "Broker fired.");
+			}
+		}catch(SQLException ex){
+			JOptionPane.showMessageDialog(null, "Failed to run query.");
+			ex.printStackTrace();
+		}
+	}
+	
 
 }

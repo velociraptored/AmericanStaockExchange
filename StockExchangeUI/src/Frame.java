@@ -143,6 +143,7 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 				broker.getPartBroker();
 				broker.getBrokerData();
 				setVisible(true);
+				current_page = broker;
 				while(stay){
 					g.setColor(Color.DARK_GRAY);
 					g.fillRect(0, 0, WIDTH, HEIGHT);
