@@ -139,6 +139,9 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 				}
 			}else if(page.equals("Broker")){
 				stay = true;
+				broker.getAllBroker();
+				broker.getPartBroker();
+				broker.getBrokerData();
 				setVisible(true);
 				while(stay){
 					g.setColor(Color.DARK_GRAY);
