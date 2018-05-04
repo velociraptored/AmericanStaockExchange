@@ -19,7 +19,8 @@ public class Main {
 		if(status){
 			//JOptionPane.showMessageDialog(null, "Database successfully connected.");
 			// Log in to the database
-			/*while(!login(DBCon));*/admin = 1;
+			while(!login(DBCon));
+			//admin = 1;
 			// Begin program
 			Frame f = new Frame(DBCon);
 			if(admin == 1)
