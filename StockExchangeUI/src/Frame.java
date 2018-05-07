@@ -30,6 +30,7 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 	private IndexAdminPage ias;
 	private AdminHomepage ahs;
 	private Transaction transact;
+	private MainPage mp;
 	private Page current_page = null;
 
 	// User interface variables
@@ -39,6 +40,7 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 
 	// Framestate variables
 	private boolean stay;
+	public String page;
 
 	// Admin privilages
 	private boolean admin;
@@ -81,6 +83,29 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 	}
 
 	// Framestate management
+	public void select_page(int i, String[] names){
+		if(i == 1) {
+			page = (String) JOptionPane.showInputDialog(null, "Select page to view.", 
+					"View Selection", JOptionPane.QUESTION_MESSAGE, null, names, names[0]);
+		} else {
+			page = null;
+			mp = new MainPage(this, names);
+			mp.getUserData();
+			current_page = mp;
+			setVisible(true);
+			stay = true;
+			while(stay){
+				g.setColor(Color.DARK_GRAY);
+				g.fillRect(0, 0, WIDTH, HEIGHT);
+				g.setColor(Color.WHITE);
+				if(mp.draw_page(g))
+					stay = false;
+				this.getGraphics().drawImage(img, 9, 38, null);
+				try{Thread.sleep(30);}catch(Exception e){};
+			}
+		}
+	}
+
 	public void run(){
 		String[] names = {};
 		if(admin){
@@ -91,8 +116,7 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 			names = temp;
 		}
 		while(true){
-			String page = (String) JOptionPane.showInputDialog(null, "Select page to view.", 
-					"View Selection", JOptionPane.QUESTION_MESSAGE, null, names, names[0]);
+			select_page(0, names);
 			if(page == null || page.length() == 0)
 				System.exit(0);
 			if(page.equals("Test")){
@@ -195,11 +219,7 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 					g.fillRect(0, 0, WIDTH, HEIGHT);
 					ds.draw_page(g);
 					this.getGraphics().drawImage(img, 9, 38, null);
-					try {
-						Thread.sleep(30);
-					} catch (Exception e) {
-					}
-					;
+					try{Thread.sleep(30);}catch(Exception e){};
 				}
 				setVisible(false);
 
@@ -218,14 +238,10 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 					g.fillRect(0, 0, WIDTH, HEIGHT);
 					ahs.draw_page(g);
 					this.getGraphics().drawImage(img, 9, 38, null);
-					try {
-						Thread.sleep(30);
-					} catch (Exception e) {
-					}
-					;
+					try{Thread.sleep(30);}catch(Exception e){};
 				}
 				setVisible(false);
-			} else if(page.equals("Transactions")){
+			} else if(page.equals("Transactions")) {
 				stay = true;
 				if(!transact.getData())
 					break;
@@ -238,7 +254,7 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 					try{Thread.sleep(30);}catch(Exception e){};
 				}
 				setVisible(false);
-			} else{
+			} else {
 				System.out.println("How did you even get here?");
 			}
 		}
