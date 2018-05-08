@@ -36,6 +36,8 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 	// User interface variables
 	public Font title = new Font("Candara", 0, 40);
 	public Font text = new Font("Candara", 0, 20);
+	public Font smallText = new Font("Candara", 0, 15);
+
 	public int mx = 0, my = 0;
 
 	// Framestate variables
