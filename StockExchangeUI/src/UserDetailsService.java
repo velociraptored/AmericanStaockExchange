@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 
-public class UserDetailsService {
+public class UserDetailsService extends Page{
 	private Frame f;
 
 	private String Username;
@@ -103,6 +103,12 @@ public class UserDetailsService {
 			return false;
 		}
 		return true;
+	}
+
+	@Override
+	public void click(int x, int y) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

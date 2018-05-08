@@ -13,16 +13,13 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
-public class AdminHomepage {
+public class AdminHomepage extends Page {
 	public Frame f;
 
 	private String Username;
 	private String FName;
 	private String MID;
 	private String LName;
-	private JButton AddUserButton = new JButton();
-	private JButton EditUserButton = new JButton();
-	private JButton DeleteUserButton = new JButton();
 	private int page = 1;
 	private int lastPage = 0;
 	private Graphics gr;
@@ -36,107 +33,73 @@ public class AdminHomepage {
 		gr = g;
 		g.setColor(Color.LIGHT_GRAY);
 		g.fillRect(0, Frame.border, Frame.WIDTH, Frame.HEIGHT - Frame.border);
-		
+
 		g.setFont(f.title);
 		g.drawString("Users", 20, 40);
-		
-		g.drawString(FName + " " + MID + " " + LName, Frame.WIDTH/2, 40);
+
+		g.drawString(FName + " " + MID + " " + LName, Frame.WIDTH / 2, 40);
 
 		g.setColor(Color.DARK_GRAY);
-		g.setFont(f.text);
+		g.setFont(f.smallText);
 
-		AddUserButton.setText("Add User");
-		EditUserButton.setText("Edit User");
-		DeleteUserButton.setText("Delete User");
+		g.drawRect(Frame.WIDTH - 150, 80, 60, 20);
+		g.fillRect(Frame.WIDTH - 150, 80, 60, 20);
+		g.setColor(Color.LIGHT_GRAY);
+		g.drawString("Add User", Frame.WIDTH - 150, 95);
 
-		AddUserButton.addMouseListener(new MouseListener() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				requestInsert();
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent arg0) {
-			}
-
-			@Override
-			public void mouseExited(MouseEvent arg0) {
-			}
-
-			@Override
-			public void mousePressed(MouseEvent arg0) {
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent arg0) {
-			}
-		});
-
-		EditUserButton.addMouseListener(new MouseListener() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				requestUpdate();
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent arg0) {
-			}
-
-			@Override
-			public void mouseExited(MouseEvent arg0) {
-			}
-
-			@Override
-			public void mousePressed(MouseEvent arg0) {
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent arg0) {
-			}
-		});
-
-		DeleteUserButton.addMouseListener(new MouseListener() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				requestDelete();
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent arg0) {
-			}
-
-			@Override
-			public void mouseExited(MouseEvent arg0) {
-			}
-
-			@Override
-			public void mousePressed(MouseEvent arg0) {
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent arg0) {
-			}
-		});
+		g.setColor(Color.DARK_GRAY);
 
 		if (listUsers.size() > 0) {
 			g.setFont(f.text);
 			// g.drawLine(x1, y1, x2, y2);
 			if (listUsers.size() > 15) {
+				g.drawString("Page " + page + " of " + lastPage, Frame.WIDTH - 600, 100);
+				if (page > 1) {
+					g.drawRect(Frame.WIDTH - 650, 80, 15, 15);
+					g.fillRect(Frame.WIDTH - 650, 80, 15, 15);
+					g.setColor(Color.LIGHT_GRAY);
+					g.drawString("<", Frame.WIDTH - 650, 95);
+				} else if (page < lastPage) {
+					g.drawRect(Frame.WIDTH - 500, 80, 15, 15);
+					g.fillRect(Frame.WIDTH - 500, 80, 15, 15);
+					g.setColor(Color.LIGHT_GRAY);
+					g.drawString(">", Frame.WIDTH - 500, 95);
+				}
 				lastPage = (int) Math.ceil((listUsers.size() / 15));
 				for (int i = 0; i < Math.min(15, listUsers.size() - 15 * (page - 1)); i++) {
-					g.drawString(listUsers.get(i + (page - 1) * 15).get(0), Frame.WIDTH - 650, 120 + 25 * i);
-					g.drawString(listUsers.get(i + (page - 1) * 15).get(1), Frame.WIDTH - 550, 120 + 25 * i);
-					g.drawString(listUsers.get(i + (page - 1) * 15).get(2), Frame.WIDTH - 450, 120 + 25 * i);
-					g.drawString(listUsers.get(i + (page - 1) * 15).get(3), Frame.WIDTH - 400, 120 + 25 * i);
-					g.drawString(listUsers.get(i + (page - 1) * 15).get(4), Frame.WIDTH - 300, 120 + 25 * i);
+					g.setFont(f.smallText);
+					g.setColor(Color.DARK_GRAY);
+					g.drawString(listUsers.get(i + (page - 1) * 15).get(0), Frame.WIDTH - 650, 140 + 25 * i);
+					g.drawString(listUsers.get(i + (page - 1) * 15).get(1), Frame.WIDTH - 550, 140 + 25 * i);
+					g.drawString(listUsers.get(i + (page - 1) * 15).get(2), Frame.WIDTH - 450, 140 + 25 * i);
+					g.drawString(listUsers.get(i + (page - 1) * 15).get(3), Frame.WIDTH - 400, 140 + 25 * i);
+					g.drawString(listUsers.get(i + (page - 1) * 15).get(4), Frame.WIDTH - 300, 140 + 25 * i);
+					g.drawRect(Frame.WIDTH - 150, 125 + 25 * i, 60, 20);
+					g.drawRect(Frame.WIDTH - 75, 125 + 25 * i, 60, 20);
+					g.fillRect(Frame.WIDTH - 150, 125 + 25 * i, 60, 20);
+					g.fillRect(Frame.WIDTH - 75, 125 + 25 * i, 60, 20);
+					g.setColor(Color.LIGHT_GRAY);
+					g.setFont(f.text);
+					g.drawString("Edit", Frame.WIDTH - 150, 140 + 25 * i);
+					g.drawString("Delete", Frame.WIDTH - 75, 140 + 25 * i);
 				}
 			} else {
 				for (int i = 0; i < listUsers.size(); i++) {
-					g.drawString(listUsers.get(i).get(0), Frame.WIDTH - 650, 120 + 25 * i);
-					g.drawString(listUsers.get(i).get(1), Frame.WIDTH - 550, 120 + 25 * i);
-					g.drawString(listUsers.get(i).get(2), Frame.WIDTH - 450, 120 + 25 * i);
-					g.drawString(listUsers.get(i).get(3), Frame.WIDTH - 400, 120 + 25 * i);
-					g.drawString(listUsers.get(i).get(4), Frame.WIDTH - 300, 120 + 25 * i);
+					g.setFont(f.smallText);
+					g.setColor(Color.DARK_GRAY);
+					g.drawString(listUsers.get(i).get(0), Frame.WIDTH - 650, 140 + 25 * i);
+					g.drawString(listUsers.get(i).get(1), Frame.WIDTH - 550, 140 + 25 * i);
+					g.drawString(listUsers.get(i).get(2), Frame.WIDTH - 450, 140 + 25 * i);
+					g.drawString(listUsers.get(i).get(3), Frame.WIDTH - 400, 140 + 25 * i);
+					g.drawString(listUsers.get(i).get(4), Frame.WIDTH - 300, 140 + 25 * i);
+					g.drawRect(Frame.WIDTH - 150, 125 + 25 * i, 60, 20);
+					g.drawRect(Frame.WIDTH - 75, 125 + 25 * i, 60, 20);
+					g.fillRect(Frame.WIDTH - 150, 125 + 25 * i, 60, 20);
+					g.fillRect(Frame.WIDTH - 75, 125 + 25 * i, 60, 20);
+					g.setColor(Color.LIGHT_GRAY);
+					g.setFont(f.text);
+					g.drawString("Edit", Frame.WIDTH - 150, 140 + 25 * i);
+					g.drawString("Delete", Frame.WIDTH - 75, 140 + 25 * i);
 				}
 			}
 		}
@@ -220,18 +183,17 @@ public class AdminHomepage {
 		}
 	}
 
-	public void requestUpdate() {
-		JTextField f1 = new JTextField();
+	public void requestUpdate(String username) {
 		JTextField f2 = new JTextField();
 		JTextField f3 = new JTextField();
 		JTextField f4 = new JTextField();
 		JTextField f5 = new JTextField();
 		JTextField f6 = new JTextField();
-		Object[] message = { "Username:", f1, "Password:", f2, "First Name:", f3, "Middle Initial:", f4, "Last Name:",
-				f5, "Email:", f6, };
+		Object[] message = { "Password:", f2, "First Name:", f3, "Middle Initial:", f4, "Last Name:", f5, "Email:",
+				f6, };
 		int option = JOptionPane.showConfirmDialog(null, message, "Update User Data.", JOptionPane.OK_CANCEL_OPTION);
 		if (option == JOptionPane.OK_OPTION)
-			updateUser(f1.getText(), f2.getText(), f3.getText(), f4.getText(), f5.getText(), f6.getText());
+			updateUser(username, f2.getText(), f3.getText(), f4.getText(), f5.getText(), f6.getText());
 	}
 
 	private void updateUser(String username, String password, String fname, String mid, String lname, String email) {
@@ -259,13 +221,12 @@ public class AdminHomepage {
 		}
 	}
 
-	public void requestDelete() {
+	public void requestDelete(String username) {
 		JTextField f1 = new JTextField();
-		JTextField f2 = new JTextField();
-		Object[] message = { "Username:", f1, "Password", f2 };
+		Object[] message = { "Password", f1 };
 		int option = JOptionPane.showConfirmDialog(null, message, "Delete User Data.", JOptionPane.OK_CANCEL_OPTION);
 		if (option == JOptionPane.OK_OPTION)
-			deleteUser(f1.getText(), f2.getText());
+			deleteUser(username, f1.getText());
 	}
 
 	private void deleteUser(String username, String password) {
@@ -288,17 +249,45 @@ public class AdminHomepage {
 			ex.printStackTrace();
 		}
 	}
-		
-	public void decrementPage(){
+
+	public void decrementPage() {
 		if (page > 1)
 			page--;
 		draw_page(gr);
 	}
-	
-	public void incrementPage(){
+
+	public void incrementPage() {
 		if (page < lastPage)
 			page++;
 		draw_page(gr);
 	}
-	
+
+	@Override
+	public void click(int x, int y) {
+		if (in(Frame.WIDTH - 650, 80, 15, 15, x, y)) {
+			decrementPage();
+		} else if (in(Frame.WIDTH - 500, 80, 15, 15, x, y)) {
+			incrementPage();
+		} else if (in(Frame.WIDTH - 150, 80, 60, 20, x, y)) {
+			requestInsert();
+		} else {
+			for (int i = 0; i < Math.min(15, listUsers.size() - 15 * (page - 1)); i++) {
+				if (in(Frame.WIDTH - 150, 125 + 25 * i, 60, 20, x, y)) {
+					requestUpdate(listUsers.get(i + (page - 1) * 15).get(0));
+				} else if (in(Frame.WIDTH - 75, 125 + 25 * i, 60, 20, x, y)) {
+					requestDelete(listUsers.get(i + (page - 1) * 15).get(0));
+				}
+			}
+		}
+
+	}
+
+	public boolean in(int bx, int by, int bw, int bh, int x, int y) {
+		if (x < bx || x > bx + bw)
+			return false;
+		if (y < by || y > by + bh)
+			return false;
+		return true;
+	}
+
 }

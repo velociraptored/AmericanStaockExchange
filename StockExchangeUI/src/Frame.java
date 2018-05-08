@@ -270,18 +270,6 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 	public void keyPressed(KeyEvent e) {
 		if(e.getKeyCode() == KeyEvent.VK_ESCAPE)
 			stay = false;
-		//To be fixed later
-		else if (admin && e.getKeyCode() == KeyEvent.VK_N)
-			ahs.requestInsert();
-		else if (admin && e.getKeyCode() == KeyEvent.VK_E)
-			ahs.requestUpdate();
-		else if (admin && e.getKeyCode() == KeyEvent.VK_R)
-			ahs.requestDelete();
-		else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-			ahs.decrementPage();
-		} else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-			ahs.incrementPage();
-		}
 	}
 	public void keyReleased(KeyEvent e) {}
 	public void keyTyped(KeyEvent e) {}
