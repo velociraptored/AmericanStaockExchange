@@ -213,6 +213,7 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 					page = "";
 					break;
 				}
+				current_page = ds;
 				setVisible(true);
 				while (stay) {
 					g.setColor(Color.DARK_GRAY);
@@ -221,6 +222,7 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 					this.getGraphics().drawImage(img, 9, 38, null);
 					try{Thread.sleep(30);}catch(Exception e){};
 				}
+				current_page = null;
 				setVisible(false);
 
 			} else if (page.equals("Admin Homepage")) {
@@ -233,6 +235,7 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 					break;
 				}
 				setVisible(true);
+				current_page = ahs;
 				while (stay) {
 					g.setColor(Color.DARK_GRAY);
 					g.fillRect(0, 0, WIDTH, HEIGHT);
@@ -240,6 +243,7 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 					this.getGraphics().drawImage(img, 9, 38, null);
 					try{Thread.sleep(30);}catch(Exception e){};
 				}
+				current_page = null;
 				setVisible(false);
 			} else if(page.equals("Transactions")) {
 				stay = true;
