@@ -1,8 +1,15 @@
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -10,8 +17,13 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+
 
 public class Frame extends JFrame implements MouseMotionListener, MouseListener, KeyListener{
 	// Frame variables
@@ -32,6 +44,7 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 	private Transaction transact;
 	private MainPage mp;
 	private Page current_page = null;
+	
 
 	// User interface variables
 	public Font title = new Font("Candara", 0, 40);
@@ -57,6 +70,7 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 		addMouseListener(this);
 		addMouseMotionListener(this);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		
 		Graphics2D g2 = (Graphics2D)g;
 		RenderingHints rh = new RenderingHints(
 				RenderingHints.KEY_TEXT_ANTIALIASING,
@@ -82,6 +96,59 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 		ds = new UserDetailsService(this);
 		ahs = new AdminHomepage(this);
 		transact = new Transaction(this);
+	}
+	public Frame(){
+		super("StockDatabase");
+		setSize(WIDTH+18, HEIGHT+47);
+		class BackgroundImageJFrame extends JFrame{
+			
+			public BackgroundImageJFrame(){
+				setSize(718,607);
+				setVisible(true);
+				
+				setLayout(new BorderLayout());
+				ImageIcon imageIcon=new ImageIcon(getClass().getResource("load.png"));
+				Image image = imageIcon.getImage(); // transform it 
+				Image newimg = image.getScaledInstance(718, 607,  java.awt.Image.SCALE_SMOOTH);
+				imageIcon = new ImageIcon(newimg);
+				
+				JLabel background=new JLabel(imageIcon);
+				add(background);
+				
+				background.setLayout(new FlowLayout());
+			}
+		}
+		final JFrame frame=new BackgroundImageJFrame();
+		JPanel panel1=new JPanel(new GridLayout(1,3));
+		JButton Login=new JButton("LOGIN");
+		Login.setPreferredSize(new Dimension(20,25));
+		JButton quit=new JButton("QUIT");
+		quit.setPreferredSize(new Dimension(20, 20));
+		panel1.add(Login);
+		panel1.add(quit);
+		frame.add(panel1,BorderLayout.SOUTH);
+		frame.setVisible(true);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		Login.addActionListener(new ActionListener(){
+			@SuppressWarnings("unused")
+			@Override
+			public void actionPerformed(ActionEvent start) {
+				frame.setVisible(false);
+				Main.connected=true;
+				Main.main(null);
+			}
+		});
+		
+		//after clicking the quit button, quit the game.
+		quit.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent quit) {
+				frame.dispose();
+				System.exit(0);
+			}
+		});
+		
+		
 	}
 
 	// Framestate management

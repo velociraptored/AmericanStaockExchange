@@ -10,25 +10,31 @@ import javax.swing.JTextField;
 public class Main {
 	public static String username, password;
 	private static int admin;
+	public static boolean connected=false;
 	
 	public static void main(String[] args) {
-		// Create connection
-		DBConnection DBCon = new DBConnection("golem.csse.rose-hulman.edu", "AmericanStockDatabase");
-		// Log in to the server
-		boolean status = DBCon.connect("StocksUser", "Password123");
-		if(status){
-			//JOptionPane.showMessageDialog(null, "Database successfully connected.");
-			// Log in to the database
-			while(!login(DBCon));
-			//admin = 1;
-			// Begin program
-			Frame f = new Frame(DBCon);
-			if(admin == 1)
-				f.setAdmin(true);
-			f.run();
+		if(connected==false){
+			Frame ff=new Frame();
 		}else{
-			JOptionPane.showMessageDialog(null, "Failed to connect to database.");
+			// Create connection
+			DBConnection DBCon = new DBConnection("golem.csse.rose-hulman.edu", "AmericanStockDatabase");
+			// Log in to the server
+			boolean status = DBCon.connect("StocksUser", "Password123");
+			if(status){
+				//JOptionPane.showMessageDialog(null, "Database successfully connected.");
+				// Log in to the database
+				while(!login(DBCon));
+				//admin = 1;
+				// Begin program
+				Frame f = new Frame(DBCon);
+				if(admin == 1)
+					f.setAdmin(true);
+				f.run();
+			}else{
+				JOptionPane.showMessageDialog(null, "Failed to connect to database.");
+			}
 		}
+		
 	}
 
 	public static boolean login(DBConnection DBCon){
