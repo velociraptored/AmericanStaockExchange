@@ -125,14 +125,13 @@ public class Transaction extends Page{
 			return;
 		}
 		String myTID = s.substring(s.indexOf('[')+1, s.indexOf(':'));
-		int currIndex;
+		int currIndex = -1;
 		for(int i = 0; i < TransactionData.size(); i++)
 			if(TransactionData.get(i).get(0).equals(myTID)){
 				currIndex = i;
 				break;
 			}
-		
-		requestUpdate(myTID);		
+		requestUpdate(myTID, currIndex);		
 	}
 	
 	public void requestInsert(){
@@ -152,11 +151,14 @@ public class Transaction extends Page{
 	}
 	
 	
-	public void requestUpdate(String myTID){
-		JTextField f1 = new JTextField();
-		JTextField f2 = new JTextField();
-		JTextField f3 = new JTextField();
-		JTextField f4 = new JTextField();
+	public void requestUpdate(String myTID, int i){
+		if(i<0){
+			return;
+		}
+		JTextField f1 = new JTextField(TransactionData.get(i).get(1));
+		JTextField f2 = new JTextField(TransactionData.get(i).get(2));
+		JTextField f3 = new JTextField(TransactionData.get(i).get(3));
+		JTextField f4 = new JTextField(TransactionData.get(i).get(4));
 		Object[] message = {
 				"Company Abbreviation:", f1,
 				"Type:", f2,
@@ -164,6 +166,7 @@ public class Transaction extends Page{
 				"Quantity:", f4
 		};
 		int option = JOptionPane.showConfirmDialog(null, message, "Edit Transaction.", JOptionPane.OK_CANCEL_OPTION);
+
 		if (option == JOptionPane.OK_OPTION)
 			editTransaction(Integer.parseInt(myTID), f1.getText(), f2.getText(),Integer.parseInt(f3.getText()),Integer.parseInt(f4.getText()));
 		else 
