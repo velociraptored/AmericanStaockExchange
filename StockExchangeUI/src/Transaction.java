@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
-public class Transaction {
+public class Transaction extends Page{
 	/*private String TID;
 	private String TimeStamp;
 	private String CompanyAbbreviation;
@@ -22,12 +22,37 @@ public class Transaction {
 	private Frame f;
 	private ArrayList<ArrayList<String>> TransactionData;
 	private String currUser;
+	
+	private String[] NAMES = {"Insert", "Edit"};
+	
 	public Transaction(Frame fr){
 		f = fr;
 	}
 	
 	public void draw_page(Graphics g){
 		g.setColor(Color.LIGHT_GRAY);
+		g.fillRect(0, Frame.border, Frame.WIDTH, Frame.HEIGHT-Frame.border);
+
+		g.setFont(f.title);
+		g.drawString("Stock Exchange Database", 20, 40);
+
+		g.setColor(Color.DARK_GRAY);
+		g.setFont(f.text);
+		g.drawString("Transactions", 10, 90);
+
+		//g.fillRect(560, Frame.border+10, 90, 30);
+		//g.setColor(Color.LIGHT_GRAY);
+		//g.drawString("Log Out", 568, Frame.border+30);
+
+		for(int i = 0; i < NAMES.length; i++) {
+			g.setColor(Color.DARK_GRAY);
+			g.drawRect(10, Frame.border+60+50*i, Frame.WIDTH-20, 50);
+			g.drawString(NAMES[i], 35, Frame.border+90+50*i);
+			g.fillRect(560, Frame.border+70+50*i, 90, 30);
+			g.setColor(Color.LIGHT_GRAY);
+			g.drawString("--Go->", 580, Frame.border+90+50*i);
+		}
+		/*g.setColor(Color.LIGHT_GRAY);
 		g.fillRect(0, Frame.border, Frame.WIDTH, Frame.HEIGHT-Frame.border);
 
 		g.setFont(f.title);
@@ -39,7 +64,7 @@ public class Transaction {
 
 		g.setFont(f.title);
 		g.drawRect(Frame.WIDTH-330, 320, 300, 210);
-		g.setFont(f.text);
+		g.setFont(f.text);*/
 	}
 	
 	public void getTransactionData(){
@@ -76,42 +101,38 @@ public class Transaction {
 	
 	public boolean getData(){
 		getTransactionData();
-		String[] ops = {"Insert", "Edit"};
-		String editInsert = (String) JOptionPane.showInputDialog(null, "Insert Or Edit",
-				"Insert or Edit", JOptionPane.QUESTION_MESSAGE, null, ops, ops[0]);
-		if(editInsert.equals("Edit")){
-			String[] names = new String[TransactionData.size()];
-			for(int i = 0; i < TransactionData.size(); i++){
-				/*"BUY 3 APPL stocks at $4/stock"*/
-				/*TODO: change stocks to stock if only 1 stock exchanged*/
-				names[i] = TransactionData.get(i).get(0)+": "+TransactionData.get(i).get(3)+" "+TransactionData.get(i).get(5)+" "+
-							TransactionData.get(i).get(2)+" stocks at $"+TransactionData.get(i).get(4)+
-							"/stock ";
-			}
-			String s;
-			if(names.length != 0){
-				s = (String) JOptionPane.showInputDialog(null, "Transaction Selection",
-					"Transaction Selection", JOptionPane.QUESTION_MESSAGE, null, names, names[0]);
-			} else {
-				s = null;
-				JOptionPane.showMessageDialog(null, "You haven't made any transactions yet.");
-			}
-			if(s == null){
-				return false;
-			}
-			String myTID = s.substring(s.indexOf('[')+1, s.indexOf(':'));
-			int currIndex;
-			for(int i = 0; i < TransactionData.size(); i++)
-				if(TransactionData.get(i).get(0).equals(myTID)){
-					currIndex = i;
-					break;
-				}
-			
-			requestUpdate(myTID);
-		} else {
-			requestInsert();
-		}
 		return true;
+	}
+	
+	public void requestEdit(){
+		String[] names = new String[TransactionData.size()];
+		for(int i = 0; i < TransactionData.size(); i++){
+			/*"BUY 3 APPL stocks at $4/stock"*/
+			/*TODO: change stocks to stock if only 1 stock exchanged*/
+			names[i] = TransactionData.get(i).get(0)+": "+TransactionData.get(i).get(3)+" "+TransactionData.get(i).get(5)+" "+
+						TransactionData.get(i).get(2)+" stocks at $"+TransactionData.get(i).get(4)+
+						"/stock ";
+		}
+		String s;
+		if(names.length != 0){
+			s = (String) JOptionPane.showInputDialog(null, "Transaction Selection",
+				"Transaction Selection", JOptionPane.QUESTION_MESSAGE, null, names, names[0]);
+		} else {
+			s = null;
+			JOptionPane.showMessageDialog(null, "You haven't made any transactions yet.");
+		}
+		if(s == null){
+			return;
+		}
+		String myTID = s.substring(s.indexOf('[')+1, s.indexOf(':'));
+		int currIndex;
+		for(int i = 0; i < TransactionData.size(); i++)
+			if(TransactionData.get(i).get(0).equals(myTID)){
+				currIndex = i;
+				break;
+			}
+		
+		requestUpdate(myTID);		
 	}
 	
 	public void requestInsert(){
@@ -195,6 +216,24 @@ public class Transaction {
 			JOptionPane.showMessageDialog(null, "Failed to run query.");
 			ex.printStackTrace();
 		}
+	}
+
+	@Override
+	public void click(int x, int y) {
+		if(in(560, 130, 90, 30, x, y)) {
+			requestInsert();
+		}
+		if(in(560, 180, 90, 30, x, y)) {
+			requestEdit();
+		}
+		
+	}
+	public boolean in(int bx, int by, int bw, int bh, int x, int y) {
+		if(x < bx || x > bx + bw)
+			return false;
+		if(y < by || y > by + bh)
+			return false;
+		return true;
 	}
 
 }

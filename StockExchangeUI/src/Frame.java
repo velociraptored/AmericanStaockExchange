@@ -251,7 +251,7 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 				stay = true;
 				if(!transact.getData())
 					break;
-				setVisible(true);
+				current_page = transact;
 				while(stay){
 					g.setColor(Color.DARK_GRAY);
 					g.fillRect(0, 0, WIDTH, HEIGHT);
@@ -259,7 +259,7 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 					this.getGraphics().drawImage(img, 9, 38, null);
 					try{Thread.sleep(30);}catch(Exception e){};
 				}
-				setVisible(false);
+				current_page = null;
 			} else {
 				System.out.println("How did you even get here?");
 			}
@@ -278,6 +278,7 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 	public void mouseExited(MouseEvent e) {}
 	public void mousePressed(MouseEvent e) {
 		if(current_page != null)
+			System.out.println("x "+mx+" y "+my);
 			current_page.click(mx, my);
 	}
 	public void mouseReleased(MouseEvent e) {}
