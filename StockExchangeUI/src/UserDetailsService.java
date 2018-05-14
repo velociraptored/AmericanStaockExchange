@@ -2,15 +2,29 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
+import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Random;
 
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 
-public class UserDetailsService extends Page{
+public class UserDetailsService extends Page {
 	private Frame f;
+
+	private static final Random RANDOM = new SecureRandom();
+	private static final Base64.Encoder enc = Base64.getEncoder();
 
 	private String Username;
 	private String FName;
@@ -45,6 +59,15 @@ public class UserDetailsService extends Page{
 			g.drawString("Access level: Standard User", 50, 190);
 		else
 			g.drawString("Access level: Administrator", 50, 190);
+
+		g.drawRect(Frame.WIDTH - 150, 80, 80, 20);
+		g.fillRect(Frame.WIDTH - 150, 80, 80, 20);
+		g.drawRect(Frame.WIDTH - 250, 80, 80, 20);
+		g.fillRect(Frame.WIDTH - 250, 80, 80, 20);
+
+		g.setColor(Color.LIGHT_GRAY);
+		g.drawString("Delete", Frame.WIDTH - 150, 95);
+		g.drawString("Edit", Frame.WIDTH - 250, 95);
 
 		if (listStocks.size() > 0) {
 			g.setFont(f.title);
@@ -105,10 +128,119 @@ public class UserDetailsService extends Page{
 		return true;
 	}
 
+	public void requestUpdate() {
+		JTextField f2 = new JTextField();
+		JTextField f3 = new JTextField();
+		JTextField f4 = new JTextField();
+		JTextField f5 = new JTextField();
+		JTextField f6 = new JTextField();
+		Object[] message = { "Password:", f2, "First Name:", f3, "Middle Initial:", f4, "Last Name:", f5, "Email:",
+				f6, };
+		int option = JOptionPane.showConfirmDialog(null, message, "Update User Data.", JOptionPane.OK_CANCEL_OPTION);
+		if (option == JOptionPane.OK_OPTION)
+			updateUser(f2.getText(), f3.getText(), f4.getText(), f5.getText(), f6.getText());
+	}
+
+	private void updateUser(String password, String fname, String mid, String lname, String email) {
+		byte[] salt = getNewSalt();
+		String hash = hashPassword(salt, password);
+		try {
+			String sqlStatement = "{ ? = call updateUser(?,?,?,?,?,?,?) }";
+			CallableStatement proc = f.DBCon.getConnection().prepareCall(sqlStatement);
+			proc.registerOutParameter(1, Types.INTEGER);
+			proc.setString(2, Username);
+			proc.setString(3, getStringFromBytes(salt));
+			proc.setString(4, hash);
+			proc.setString(5, fname);
+			proc.setString(6, mid);
+			proc.setString(7, lname);
+			proc.setString(8, email);
+			proc.execute();
+
+			int status = proc.getInt(1);
+			if (status == 1) {
+				JOptionPane.showMessageDialog(null, "ERROR: User does not exist in the database.");
+			} else {
+				JOptionPane.showMessageDialog(null, "User updated.");
+			}
+		} catch (SQLException ex) {
+			JOptionPane.showMessageDialog(null, "Failed to run query.");
+			ex.printStackTrace();
+		}
+	}
+
+	public void requestDelete() {
+		JTextField f1 = new JTextField();
+		Object[] message = { "Password", f1 };
+		int option = JOptionPane.showConfirmDialog(null, message, "Delete User Data.", JOptionPane.OK_CANCEL_OPTION);
+		if (option == JOptionPane.OK_OPTION)
+			deleteUser(f1.getText());
+	}
+
+	private void deleteUser(String password) {
+		try {
+			String sqlStatement = "{ ? = call deleteUser(?,?) }";
+			CallableStatement proc = f.DBCon.getConnection().prepareCall(sqlStatement);
+			proc.registerOutParameter(1, Types.INTEGER);
+			proc.setString(2, Username);
+			proc.setString(3, password);
+			proc.execute();
+
+			int status = proc.getInt(1);
+			if (status == 1) {
+				JOptionPane.showMessageDialog(null, "ERROR: User does not exist in the database.");
+			} else {
+				JOptionPane.showMessageDialog(null, "User deleted.");
+			}
+		} catch (SQLException ex) {
+			JOptionPane.showMessageDialog(null, "Failed to run query.");
+			ex.printStackTrace();
+		}
+	}
+
 	@Override
 	public void click(int x, int y) {
-		// TODO Auto-generated method stub
-		
+		if (in(Frame.WIDTH - 150, 80, 80, 20, x, y)) {
+			requestDelete();
+		} else if (in(Frame.WIDTH - 250, 80, 80, 20, x, y)) {
+			requestUpdate();
+		}
+	}
+
+	public boolean in(int bx, int by, int bw, int bh, int x, int y) {
+		if (x < bx || x > bx + bw)
+			return false;
+		if (y < by || y > by + bh)
+			return false;
+		return true;
+	}
+
+	public byte[] getNewSalt() {
+		byte[] salt = new byte[16];
+		RANDOM.nextBytes(salt);
+		return salt;
+	}
+
+	public String getStringFromBytes(byte[] data) {
+		return enc.encodeToString(data);
+	}
+
+	public String hashPassword(byte[] salt, String password) {
+
+		KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, 65536, 128);
+		SecretKeyFactory f;
+		byte[] hash = null;
+		try {
+			f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+			hash = f.generateSecret(spec).getEncoded();
+		} catch (NoSuchAlgorithmException e) {
+			JOptionPane.showMessageDialog(null, "An error occurred during password hashing. See stack trace.");
+			e.printStackTrace();
+		} catch (InvalidKeySpecException e) {
+			JOptionPane.showMessageDialog(null, "An error occurred during password hashing. See stack trace.");
+			e.printStackTrace();
+		}
+		return getStringFromBytes(hash);
 	}
 
 }

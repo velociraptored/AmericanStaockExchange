@@ -52,12 +52,12 @@ public class AdminHomepage extends Page {
 		g.drawString(FName + " " + MID + " " + LName, Frame.WIDTH / 2, 40);
 
 		g.setColor(Color.DARK_GRAY);
-		g.setFont(f.smallText);
 
-		g.drawRect(Frame.WIDTH - 150, 80, 60, 20);
-		g.fillRect(Frame.WIDTH - 150, 80, 60, 20);
+		g.drawRect(Frame.WIDTH - 150, 80, 80, 20);
+		g.fillRect(Frame.WIDTH - 150, 80, 80, 20);
 		g.setColor(Color.LIGHT_GRAY);
 		g.drawString("Add User", Frame.WIDTH - 150, 95);
+		g.setFont(f.smallText);
 
 		g.setColor(Color.DARK_GRAY);
 
