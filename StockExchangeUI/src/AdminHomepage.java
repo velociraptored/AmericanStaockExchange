@@ -2,19 +2,31 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Random;
 
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
 public class AdminHomepage extends Page {
 	public Frame f;
+	
+	private static final Random RANDOM = new SecureRandom();
+	private static final Base64.Encoder enc = Base64.getEncoder();
+
 
 	private String Username;
 	private String FName;
@@ -159,16 +171,19 @@ public class AdminHomepage extends Page {
 	}
 
 	private void insertUser(String username, String password, String fname, String mid, String lname, String email) {
+		byte[] salt = getNewSalt();
+		String hash = hashPassword(salt, password);
 		try {
-			String sqlStatement = "{ ? = call InsertUser(?,?,?,?,?,?) }";
+			String sqlStatement = "{ ? = call InsertUser(?,?,?,?,?,?,?) }";
 			CallableStatement proc = f.DBCon.getConnection().prepareCall(sqlStatement);
 			proc.registerOutParameter(1, Types.INTEGER);
 			proc.setString(2, username);
-			proc.setString(3, password);
-			proc.setString(4, fname);
-			proc.setString(5, mid);
-			proc.setString(6, lname);
-			proc.setString(7, email);
+			proc.setString(3, getStringFromBytes(salt));
+			proc.setString(4, hash);
+			proc.setString(5, fname);
+			proc.setString(6, mid);
+			proc.setString(7, lname);
+			proc.setString(8, email);
 			proc.execute();
 
 			int status = proc.getInt(1);
@@ -197,16 +212,19 @@ public class AdminHomepage extends Page {
 	}
 
 	private void updateUser(String username, String password, String fname, String mid, String lname, String email) {
+		byte[] salt = getNewSalt();
+		String hash = hashPassword(salt, password);
 		try {
-			String sqlStatement = "{ ? = call updateUser(?,?,?,?,?,?) }";
+			String sqlStatement = "{ ? = call updateUser(?,?,?,?,?,?,?) }";
 			CallableStatement proc = f.DBCon.getConnection().prepareCall(sqlStatement);
 			proc.registerOutParameter(1, Types.INTEGER);
 			proc.setString(2, username);
-			proc.setString(3, password);
-			proc.setString(4, fname);
-			proc.setString(5, mid);
-			proc.setString(6, lname);
-			proc.setString(7, email);
+			proc.setString(3, getStringFromBytes(salt));
+			proc.setString(4, hash);
+			proc.setString(5, fname);
+			proc.setString(6, mid);
+			proc.setString(7, lname);
+			proc.setString(8, email);
 			proc.execute();
 
 			int status = proc.getInt(1);
@@ -288,6 +306,34 @@ public class AdminHomepage extends Page {
 		if (y < by || y > by + bh)
 			return false;
 		return true;
+	}
+	
+	public byte[] getNewSalt() {
+		byte[] salt = new byte[16];
+		RANDOM.nextBytes(salt);
+		return salt;
+	}
+
+	public String getStringFromBytes(byte[] data) {
+		return enc.encodeToString(data);
+	}
+
+	public String hashPassword(byte[] salt, String password) {
+
+		KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, 65536, 128);
+		SecretKeyFactory f;
+		byte[] hash = null;
+		try {
+			f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+			hash = f.generateSecret(spec).getEncoded();
+		} catch (NoSuchAlgorithmException e) {
+			JOptionPane.showMessageDialog(null, "An error occurred during password hashing. See stack trace.");
+			e.printStackTrace();
+		} catch (InvalidKeySpecException e) {
+			JOptionPane.showMessageDialog(null, "An error occurred during password hashing. See stack trace.");
+			e.printStackTrace();
+		}
+		return getStringFromBytes(hash);
 	}
 
 }
