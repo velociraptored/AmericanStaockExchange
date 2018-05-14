@@ -1,7 +1,5 @@
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -17,16 +15,15 @@ import java.util.Random;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-import javax.swing.JButton;
 import javax.swing.JOptionPane;
+import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 public class AdminHomepage extends Page {
 	public Frame f;
-	
+
 	private static final Random RANDOM = new SecureRandom();
 	private static final Base64.Encoder enc = Base64.getEncoder();
-
 
 	private String Username;
 	private String FName;
@@ -52,11 +49,11 @@ public class AdminHomepage extends Page {
 		g.drawString(FName + " " + MID + " " + LName, Frame.WIDTH / 2, 40);
 
 		g.setColor(Color.DARK_GRAY);
-
+		g.setFont(f.text);
 		g.drawRect(Frame.WIDTH - 150, 80, 80, 20);
 		g.fillRect(Frame.WIDTH - 150, 80, 80, 20);
 		g.setColor(Color.LIGHT_GRAY);
-		g.drawString("Add User", Frame.WIDTH - 150, 95);
+		g.drawString("Add User", Frame.WIDTH - 148, 95);
 		g.setFont(f.smallText);
 
 		g.setColor(Color.DARK_GRAY);
@@ -67,11 +64,14 @@ public class AdminHomepage extends Page {
 			if (listUsers.size() > 15) {
 				g.drawString("Page " + page + " of " + lastPage, Frame.WIDTH - 600, 100);
 				if (page > 1) {
+					g.setColor(Color.DARK_GRAY);
 					g.drawRect(Frame.WIDTH - 650, 80, 15, 15);
 					g.fillRect(Frame.WIDTH - 650, 80, 15, 15);
 					g.setColor(Color.LIGHT_GRAY);
 					g.drawString("<", Frame.WIDTH - 650, 95);
-				} else if (page < lastPage) {
+				}
+				if (page < lastPage) {
+					g.setColor(Color.DARK_GRAY);
 					g.drawRect(Frame.WIDTH - 500, 80, 15, 15);
 					g.fillRect(Frame.WIDTH - 500, 80, 15, 15);
 					g.setColor(Color.LIGHT_GRAY);
@@ -81,37 +81,39 @@ public class AdminHomepage extends Page {
 				for (int i = 0; i < Math.min(15, listUsers.size() - 15 * (page - 1)); i++) {
 					g.setFont(f.smallText);
 					g.setColor(Color.DARK_GRAY);
+					String name = listUsers.get(i + (page - 1) * 15).get(3) + ", "
+							+ listUsers.get(i + (page - 1) * 15).get(1) + " "
+							+ listUsers.get(i + (page - 1) * 15).get(2);
 					g.drawString(listUsers.get(i + (page - 1) * 15).get(0), Frame.WIDTH - 650, 140 + 25 * i);
-					g.drawString(listUsers.get(i + (page - 1) * 15).get(1), Frame.WIDTH - 550, 140 + 25 * i);
-					g.drawString(listUsers.get(i + (page - 1) * 15).get(2), Frame.WIDTH - 450, 140 + 25 * i);
-					g.drawString(listUsers.get(i + (page - 1) * 15).get(3), Frame.WIDTH - 400, 140 + 25 * i);
-					g.drawString(listUsers.get(i + (page - 1) * 15).get(4), Frame.WIDTH - 300, 140 + 25 * i);
+					g.drawString(name, Frame.WIDTH - 550, 140 + 25 * i);
+					g.drawString(listUsers.get(i + (page - 1) * 15).get(4), Frame.WIDTH - 350, 140 + 25 * i);
 					g.drawRect(Frame.WIDTH - 150, 125 + 25 * i, 60, 20);
 					g.drawRect(Frame.WIDTH - 75, 125 + 25 * i, 60, 20);
 					g.fillRect(Frame.WIDTH - 150, 125 + 25 * i, 60, 20);
 					g.fillRect(Frame.WIDTH - 75, 125 + 25 * i, 60, 20);
 					g.setColor(Color.LIGHT_GRAY);
 					g.setFont(f.text);
-					g.drawString("Edit", Frame.WIDTH - 150, 140 + 25 * i);
-					g.drawString("Delete", Frame.WIDTH - 75, 140 + 25 * i);
+					g.drawString("Edit", Frame.WIDTH - 138, 140 + 25 * i);
+					g.drawString("Delete", Frame.WIDTH - 71, 140 + 25 * i);
 				}
 			} else {
 				for (int i = 0; i < listUsers.size(); i++) {
 					g.setFont(f.smallText);
 					g.setColor(Color.DARK_GRAY);
+					String name = listUsers.get(i).get(3) + ", "
+							+ listUsers.get(i).get(1) + " "
+							+ listUsers.get(i).get(2);
 					g.drawString(listUsers.get(i).get(0), Frame.WIDTH - 650, 140 + 25 * i);
-					g.drawString(listUsers.get(i).get(1), Frame.WIDTH - 550, 140 + 25 * i);
-					g.drawString(listUsers.get(i).get(2), Frame.WIDTH - 450, 140 + 25 * i);
-					g.drawString(listUsers.get(i).get(3), Frame.WIDTH - 400, 140 + 25 * i);
-					g.drawString(listUsers.get(i).get(4), Frame.WIDTH - 300, 140 + 25 * i);
+					g.drawString(name, Frame.WIDTH - 550, 140 + 25 * i);
+					g.drawString(listUsers.get(i).get(4), Frame.WIDTH - 350, 140 + 25 * i);
 					g.drawRect(Frame.WIDTH - 150, 125 + 25 * i, 60, 20);
 					g.drawRect(Frame.WIDTH - 75, 125 + 25 * i, 60, 20);
 					g.fillRect(Frame.WIDTH - 150, 125 + 25 * i, 60, 20);
 					g.fillRect(Frame.WIDTH - 75, 125 + 25 * i, 60, 20);
 					g.setColor(Color.LIGHT_GRAY);
 					g.setFont(f.text);
-					g.drawString("Edit", Frame.WIDTH - 150, 140 + 25 * i);
-					g.drawString("Delete", Frame.WIDTH - 75, 140 + 25 * i);
+					g.drawString("Edit", Frame.WIDTH - 138, 140 + 25 * i);
+					g.drawString("Delete", Frame.WIDTH - 71, 140 + 25 * i);
 				}
 			}
 		}
@@ -158,7 +160,7 @@ public class AdminHomepage extends Page {
 
 	public void requestInsert() {
 		JTextField f1 = new JTextField();
-		JTextField f2 = new JTextField();
+		JPasswordField f2 = new JPasswordField();
 		JTextField f3 = new JTextField();
 		JTextField f4 = new JTextField();
 		JTextField f5 = new JTextField();
@@ -167,7 +169,8 @@ public class AdminHomepage extends Page {
 				f5, "Email:", f6, };
 		int option = JOptionPane.showConfirmDialog(null, message, "Insert User Data.", JOptionPane.OK_CANCEL_OPTION);
 		if (option == JOptionPane.OK_OPTION)
-			insertUser(f1.getText(), f2.getText(), f3.getText(), f4.getText(), f5.getText(), f6.getText());
+			insertUser(f1.getText(), f2.getPassword().toString(), f3.getText(), f4.getText(), f5.getText(),
+					f6.getText());
 	}
 
 	private void insertUser(String username, String password, String fname, String mid, String lname, String email) {
@@ -199,16 +202,32 @@ public class AdminHomepage extends Page {
 	}
 
 	public void requestUpdate(String username) {
-		JTextField f2 = new JTextField();
+		JPasswordField f2 = new JPasswordField();
 		JTextField f3 = new JTextField();
 		JTextField f4 = new JTextField();
 		JTextField f5 = new JTextField();
 		JTextField f6 = new JTextField();
+		f3.setText(FName);
+		f4.setText(MID);
+		f5.setText(LName);
+		String sqlStatement = "SELECT * FROM [User]";
+		PreparedStatement proc;
+		try {
+			proc = f.DBCon.getConnection().prepareStatement(sqlStatement);
+			ResultSet rs = proc.executeQuery();
+			rs.next();
+			f6.setText(rs.getString("Email"));
+
+		} catch (SQLException e) {
+			//  Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		Object[] message = { "Password:", f2, "First Name:", f3, "Middle Initial:", f4, "Last Name:", f5, "Email:",
 				f6, };
 		int option = JOptionPane.showConfirmDialog(null, message, "Update User Data.", JOptionPane.OK_CANCEL_OPTION);
 		if (option == JOptionPane.OK_OPTION)
-			updateUser(username, f2.getText(), f3.getText(), f4.getText(), f5.getText(), f6.getText());
+			updateUser(username, f2.getPassword().toString(), f3.getText(), f4.getText(), f5.getText(), f6.getText());
 	}
 
 	private void updateUser(String username, String password, String fname, String mid, String lname, String email) {
@@ -307,7 +326,7 @@ public class AdminHomepage extends Page {
 			return false;
 		return true;
 	}
-	
+
 	public byte[] getNewSalt() {
 		byte[] salt = new byte[16];
 		RANDOM.nextBytes(salt);

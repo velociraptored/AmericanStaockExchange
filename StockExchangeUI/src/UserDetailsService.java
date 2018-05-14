@@ -1,7 +1,5 @@
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -18,6 +16,7 @@ import java.util.Random;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.swing.JOptionPane;
+import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 public class UserDetailsService extends Page {
@@ -95,12 +94,6 @@ public class UserDetailsService extends Page {
 			Email = rs.getString("Email");
 			NetGain = rs.getInt("NetGain");
 			Admin = rs.getInt("Admin");
-			System.out.println(FName);
-			System.out.println(MID);
-			System.out.println(LName);
-			System.out.println(Email);
-			System.out.println(NetGain);
-			System.out.println(Admin);
 		} catch (SQLException ex) {
 			JOptionPane.showMessageDialog(null, "Failed to fetch user data.");
 			ex.printStackTrace();
@@ -129,16 +122,21 @@ public class UserDetailsService extends Page {
 	}
 
 	public void requestUpdate() {
-		JTextField f2 = new JTextField();
+		JPasswordField f2 = new JPasswordField();
 		JTextField f3 = new JTextField();
 		JTextField f4 = new JTextField();
 		JTextField f5 = new JTextField();
 		JTextField f6 = new JTextField();
+		f3.setText(FName);
+		f4.setText(MID);
+		f5.setText(LName);
+		f6.setText(Email);
+
 		Object[] message = { "Password:", f2, "First Name:", f3, "Middle Initial:", f4, "Last Name:", f5, "Email:",
 				f6, };
 		int option = JOptionPane.showConfirmDialog(null, message, "Update User Data.", JOptionPane.OK_CANCEL_OPTION);
 		if (option == JOptionPane.OK_OPTION)
-			updateUser(f2.getText(), f3.getText(), f4.getText(), f5.getText(), f6.getText());
+			updateUser(f2.getPassword().toString(), f3.getText(), f4.getText(), f5.getText(), f6.getText());
 	}
 
 	private void updateUser(String password, String fname, String mid, String lname, String email) {
