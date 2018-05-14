@@ -166,8 +166,7 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 			}else if(page.equals("Broker")){
 				stay = true;
 				broker.getAllBroker();
-				broker.getPartBroker();
-				broker.getBrokerData();
+				broker.getHiredBrokers();
 				setVisible(true);
 				current_page = broker;
 				while(stay){

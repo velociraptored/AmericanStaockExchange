@@ -23,16 +23,12 @@ public class Main {
 		// Log in to the server
 		boolean status = DBCon.connect("StocksUser", "Password123");
 		if (status) {
-			// JOptionPane.showMessageDialog(null, "Database successfully
-			// connected.");
 			// Log in to the database
-			while (!login(DBCon))
-				;
-			// admin = 1;
-			// Begin program
+			while (!login(DBCon));
 			Frame f = new Frame(DBCon);
 			if (admin == 1)
 				f.setAdmin(true);
+			// Begin program
 			f.run();
 		} else {
 			JOptionPane.showMessageDialog(null, "Failed to connect to database.");
