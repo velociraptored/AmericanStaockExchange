@@ -1,8 +1,14 @@
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Base64;
 
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
@@ -10,7 +16,8 @@ import javax.swing.JTextField;
 public class Main {
 	public static String username, password;
 	private static int admin;
-	
+	private static final Base64.Encoder enc = Base64.getEncoder();
+
 	public static void main(String[] args) {
 		// Create connection
 		DBConnection DBCon = new DBConnection("golem.csse.rose-hulman.edu", "AmericanStockDatabase");
@@ -32,7 +39,7 @@ public class Main {
 	}
 
 	public static boolean login(DBConnection DBCon){
-		String format = "SELECT Password,Admin \nFROM [User]\nWHERE Username = ?";
+		String format = "SELECT Password,Salt,Admin \nFROM [User]\nWHERE Username = ?";
 		JTextField user_field = new JTextField();
 		JPasswordField pass_field = new JPasswordField();
 		Object[] message = {
@@ -47,6 +54,7 @@ public class Main {
 			System.exit(0);
 		}
 		username = user_field.getText();
+		password = pass_field.getPassword().toString();
 		try {
 			PreparedStatement stmt = DBCon.getConnection().prepareStatement(format);
 			stmt.setString(1, username);
@@ -55,8 +63,11 @@ public class Main {
 			if(rs.next()){
 				admin = rs.getInt(rs.findColumn("Admin"));
 				String pass = rs.getString(rs.findColumn("Password"));
-				if(Arrays.equals(pass.toCharArray(), pass_field.getPassword())){
-					password = pass;
+				String salt = rs.getString(rs.findColumn("Salt"));
+				
+				String passHash = hashPassword(salt.getBytes(), password);
+				
+				if(passHash.equals(pass)){
 					return true;
 				}
 			}
@@ -69,4 +80,28 @@ public class Main {
 			return false;
 		}
 	}
+	
+	public static String hashPassword(byte[] salt, String password) {
+
+		KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, 65536, 128);
+		SecretKeyFactory f;
+		byte[] hash = null;
+		try {
+			f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+			hash = f.generateSecret(spec).getEncoded();
+		} catch (NoSuchAlgorithmException e) {
+			JOptionPane.showMessageDialog(null, "An error occurred during password hashing. See stack trace.");
+			e.printStackTrace();
+		} catch (InvalidKeySpecException e) {
+			JOptionPane.showMessageDialog(null, "An error occurred during password hashing. See stack trace.");
+			e.printStackTrace();
+		}
+		return getStringFromBytes(hash);
+	}
+
+	public static String getStringFromBytes(byte[] data) {
+		return enc.encodeToString(data);
+	}
+
+	
 }
