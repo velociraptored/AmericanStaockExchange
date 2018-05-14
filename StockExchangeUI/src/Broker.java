@@ -236,7 +236,7 @@ public class Broker extends Page {
 	public void fireBroker(String Username,int BID){
 		try{
 			String sqlStatement = "{ ? = call FireBroker(?,?) }";
-			CallableStatement proc = f.DBCon.getConnection().prepareCall(sqlStatement);
+			CallableStatement proc = f.DBCon.getConnection().prepareCall(sqlStatement); 
 			proc.registerOutParameter(1, Types.INTEGER);
 			proc.setString(2, Username);
 			proc.setInt(3, BID);
