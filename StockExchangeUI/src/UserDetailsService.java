@@ -68,6 +68,8 @@ public class UserDetailsService extends Page {
 		g.drawString("Delete", Frame.WIDTH - 150, 95);
 		g.drawString("Edit", Frame.WIDTH - 250, 95);
 
+		
+		g.setColor(Color.DARK_GRAY);
 		if (listStocks.size() > 0) {
 			g.setFont(f.title);
 			g.drawString("Stocks", 50, 250);
