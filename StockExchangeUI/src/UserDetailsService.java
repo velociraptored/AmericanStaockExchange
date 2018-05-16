@@ -53,7 +53,7 @@ public class UserDetailsService extends Page {
 		}
 		g.drawString(Username, 50, 100);
 		g.drawString(Email, 50, 130);
-		g.drawString("Total Profits: " + NetGain, 50, 160);
+		g.drawString("Total Profits: $" + NetGain, 50, 160);
 		if (Admin == 0)
 			g.drawString("Access level: Standard User", 50, 190);
 		else
@@ -65,19 +65,22 @@ public class UserDetailsService extends Page {
 		g.fillRect(Frame.WIDTH - 250, 80, 80, 20);
 
 		g.setColor(Color.LIGHT_GRAY);
-		g.drawString("Delete", Frame.WIDTH - 150, 95);
-		g.drawString("Edit", Frame.WIDTH - 250, 95);
+		g.drawString("Delete", Frame.WIDTH - 137, 95);
+		g.drawString("Edit", Frame.WIDTH - 225, 95);
 
 		
 		g.setColor(Color.DARK_GRAY);
 		if (listStocks.size() > 0) {
 			g.setFont(f.title);
-			g.drawString("Stocks", 50, 250);
+			g.drawString("Stocks", 50, 300);
 			g.setFont(f.text);
+			g.drawString("Abbr.", 50, 350);
+			g.drawString("Company", 150, 350);
+			g.drawString("Quantity", 350, 350);
 			for (int i = 0; i < listStocks.size(); i++) {
-				g.drawString(listStocks.get(i).get(0), 50, 300 + 25 * i);
-				g.drawString(listStocks.get(i).get(1), 100, 300 + 25 * i);
-				g.drawString(listStocks.get(i).get(2), 300, 300 + 25 * i);
+				g.drawString(listStocks.get(i).get(0), 50, 380 + 25 * i);
+				g.drawString(listStocks.get(i).get(1), 150, 380 + 25 * i);
+				g.drawString(listStocks.get(i).get(2), 350, 380 + 25 * i);
 			}
 		}
 
@@ -134,7 +137,7 @@ public class UserDetailsService extends Page {
 		f5.setText(LName);
 		f6.setText(Email);
 
-		Object[] message = { "Password:", f2, "First Name:", f3, "Middle Initial:", f4, "Last Name:", f5, "Email:",
+		Object[] message = { Username, "Password:", f2, "First Name:", f3, "Middle Initial:", f4, "Last Name:", f5, "Email:",
 				f6, };
 		int option = JOptionPane.showConfirmDialog(null, message, "Update User Data.", JOptionPane.OK_CANCEL_OPTION);
 		if (option == JOptionPane.OK_OPTION)
@@ -171,7 +174,7 @@ public class UserDetailsService extends Page {
 
 	public void requestDelete() {
 		JTextField f1 = new JTextField();
-		Object[] message = { "Password", f1 };
+		Object[] message = { Username, "Password", f1 };
 		int option = JOptionPane.showConfirmDialog(null, message, "Delete User Data.", JOptionPane.OK_CANCEL_OPTION);
 		if (option == JOptionPane.OK_OPTION)
 			deleteUser(f1.getText());

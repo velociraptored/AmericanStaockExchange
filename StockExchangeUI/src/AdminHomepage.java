@@ -207,15 +207,16 @@ public class AdminHomepage extends Page {
 		JTextField f4 = new JTextField();
 		JTextField f5 = new JTextField();
 		JTextField f6 = new JTextField();
-		f3.setText(FName);
-		f4.setText(MID);
-		f5.setText(LName);
-		String sqlStatement = "SELECT * FROM [User]";
+		
+		String sqlStatement = "SELECT * FROM [User] WHERE [username] = '" + username + "'";
 		PreparedStatement proc;
 		try {
 			proc = f.DBCon.getConnection().prepareStatement(sqlStatement);
 			ResultSet rs = proc.executeQuery();
 			rs.next();
+			f3.setText(rs.getString("FName"));
+			f4.setText(rs.getString("MID"));
+			f5.setText(rs.getString("LName"));
 			f6.setText(rs.getString("Email"));
 
 		} catch (SQLException e) {
@@ -223,7 +224,7 @@ public class AdminHomepage extends Page {
 			e.printStackTrace();
 		}
 
-		Object[] message = { "Password:", f2, "First Name:", f3, "Middle Initial:", f4, "Last Name:", f5, "Email:",
+		Object[] message = { username, "Password:", f2, "First Name:", f3, "Middle Initial:", f4, "Last Name:", f5, "Email:",
 				f6, };
 		int option = JOptionPane.showConfirmDialog(null, message, "Update User Data.", JOptionPane.OK_CANCEL_OPTION);
 		if (option == JOptionPane.OK_OPTION)
@@ -260,7 +261,7 @@ public class AdminHomepage extends Page {
 
 	public void requestDelete(String username) {
 		JTextField f1 = new JTextField();
-		Object[] message = { "Password", f1 };
+		Object[] message = { username, "Password", f1 };
 		int option = JOptionPane.showConfirmDialog(null, message, "Delete User Data.", JOptionPane.OK_CANCEL_OPTION);
 		if (option == JOptionPane.OK_OPTION)
 			deleteUser(username, f1.getText());
