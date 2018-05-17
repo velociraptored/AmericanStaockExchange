@@ -1,9 +1,11 @@
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Base64;
 
 import javax.crypto.SecretKeyFactory;
@@ -48,23 +50,22 @@ public class Main {
 			System.exit(0);
 		}
 		username = user_field.getText();
-		password = pass_field.getPassword().toString();
+		password = String.valueOf(pass_field.getPassword());
+		
+		
+		
 		try {
 			PreparedStatement stmt = DBCon.getConnection().prepareStatement(format);
 			stmt.setString(1, username);
 
 			ResultSet rs = stmt.executeQuery();
-			admin = 1; // Remove
-			boolean b = true;
-			if (b) // Remove
-				return true;
 
 			if (rs.next()) {
 				admin = rs.getInt(rs.findColumn("Admin"));
 				String pass = rs.getString(rs.findColumn("Password"));
-				String salt = rs.getString(rs.findColumn("Salt"));
+				byte[] salt = rs.getBytes(rs.findColumn("Salt"));
 
-				String passHash = hashPassword(salt.getBytes(), password);
+				String passHash = hashPassword(salt, password);
 
 				if (passHash.equals(pass)) {
 					return true;

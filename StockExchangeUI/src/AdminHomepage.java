@@ -236,7 +236,7 @@ public class AdminHomepage extends Page {
 				"Email:", f6, };
 		int option = JOptionPane.showConfirmDialog(null, message, "Update User Data.", JOptionPane.OK_CANCEL_OPTION);
 		if (option == JOptionPane.OK_OPTION)
-			updateUser(username, f2.getPassword().toString(), f3.getText(), f4.getText(), f5.getText(), f6.getText());
+			updateUser(username, String.valueOf(f2.getPassword()), f3.getText(), f4.getText(), f5.getText(), f6.getText());
 	}
 
 	private void updateUser(String username, String password, String fname, String mid, String lname, String email) {
@@ -249,9 +249,7 @@ public class AdminHomepage extends Page {
 			salt = null;
 			hash = "";
 		}
-		System.out.println(hash);
-		System.out.println(getStringFromBytes(salt));
-
+		
 		try {
 			String sqlStatement = "{ ? = call editUser(?,?,?,?,?,?,?) }";
 			CallableStatement proc = f.DBCon.getConnection().prepareCall(sqlStatement);
@@ -266,12 +264,7 @@ public class AdminHomepage extends Page {
 			proc.execute();
 
 			int status = proc.getInt(1);
-			// if (status == 1) {
-			// JOptionPane.showMessageDialog(null, "ERROR: User does not exist
-			// in the database.");
-			// } else {
-			// JOptionPane.showMessageDialog(null, "User updated.");
-			// }
+		
 		} catch (SQLException ex) {
 			JOptionPane.showMessageDialog(null, "Failed to run query.");
 			ex.printStackTrace();
@@ -283,7 +276,7 @@ public class AdminHomepage extends Page {
 		Object[] message = { username, "Password", f1 };
 		int option = JOptionPane.showConfirmDialog(null, message, "Delete User Data.", JOptionPane.OK_CANCEL_OPTION);
 		if (option == JOptionPane.OK_OPTION)
-			deleteUser(username, f1.getPassword().toString());
+			deleteUser(username, String.valueOf(f1.getPassword()));
 	}
 
 	private void deleteUser(String username, String password) {
@@ -295,11 +288,8 @@ public class AdminHomepage extends Page {
 			rs.next();
 			String realHash = rs.getString("Password");
 			byte[] salt = rs.getBytes("Salt");
-			System.out.println(realHash);
-			System.out.println(getStringFromBytes(salt));
 			String testHash = hashPassword(salt, password);
-			System.out.println(testHash);
-
+			
 			if (realHash.equals(testHash)) {
 				String sqlStatement = "{ ? = call deleteUser(?) }";
 				CallableStatement proc = f.DBCon.getConnection().prepareCall(sqlStatement);
