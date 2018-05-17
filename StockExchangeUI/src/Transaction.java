@@ -147,7 +147,7 @@ public class Transaction extends Page{
 		};
 		int option = JOptionPane.showConfirmDialog(null, message, "Create Transaction.", JOptionPane.OK_CANCEL_OPTION);
 		if (option == JOptionPane.OK_OPTION)
-			insertTransaction(f1.getText(),f2.getText(),f3.getText(),Integer.parseInt(f4.getText()));
+			insertTransaction(Main.username, f1.getText(),f2.getText(),f3.getText(),Integer.parseInt(f4.getText()));
 	}
 	
 	
@@ -155,10 +155,10 @@ public class Transaction extends Page{
 		if(i<0){
 			return;
 		}
-		JTextField f1 = new JTextField(TransactionData.get(i).get(1));
-		JTextField f2 = new JTextField(TransactionData.get(i).get(2));
-		JTextField f3 = new JTextField(TransactionData.get(i).get(3));
-		JTextField f4 = new JTextField(TransactionData.get(i).get(4));
+		JTextField f1 = new JTextField(TransactionData.get(i).get(2));
+		JTextField f2 = new JTextField(TransactionData.get(i).get(3));
+		JTextField f3 = new JTextField(TransactionData.get(i).get(4));
+		JTextField f4 = new JTextField(TransactionData.get(i).get(5));
 		Object[] message = {
 				"Company Abbreviation:", f1,
 				"Type:", f2,
@@ -168,17 +168,17 @@ public class Transaction extends Page{
 		int option = JOptionPane.showConfirmDialog(null, message, "Edit Transaction.", JOptionPane.OK_CANCEL_OPTION);
 
 		if (option == JOptionPane.OK_OPTION)
-			editTransaction(Integer.parseInt(myTID), f1.getText(), f2.getText(),Integer.parseInt(f3.getText()),Integer.parseInt(f4.getText()));
+			editTransaction(Main.username, Integer.parseInt(myTID), f1.getText(), f2.getText(),Integer.parseInt(f3.getText()),Integer.parseInt(f4.getText()));
 		else 
 			getData();
 	}
 	
-	public void insertTransaction(String Abb, String Type, String Price, int Quantity){
+	public void insertTransaction(String user, String Abb, String Type, String Price, int Quantity){
 		try{
 			String sqlStatement = "{ ? = call CreateTransaction(?,?,?,?,?) }";
 			CallableStatement proc = f.DBCon.getConnection().prepareCall(sqlStatement);
 			proc.registerOutParameter(1, Types.INTEGER);
-			proc.setString(2, Main.username);
+			proc.setString(2, user);
 			proc.setString(3, Abb);
 			proc.setString(4, Type);
 			proc.setString(5, Price);
@@ -197,23 +197,24 @@ public class Transaction extends Page{
 		}
 	}
 	
-	public void editTransaction(int TID, String CompanyAbbreviation, String Type, int Price, int Quantity ){
+	public void editTransaction(String user, int TID, String CompanyAbbreviation, String Type, int Price, int Quantity ){
 
 		try{
-			String sqlStatement = "{ ? = call EditTransaction(?,?,?,?,?) }";
+			String sqlStatement = "{ ? = call EditTransaction(?,?,?,?,?,?) }";
 			CallableStatement proc = f.DBCon.getConnection().prepareCall(sqlStatement);
 			proc.registerOutParameter(1, Types.INTEGER);
 			proc.setInt(2, TID);
-			proc.setString(3, CompanyAbbreviation);
-			proc.setString(4, Type);
-			proc.setInt(5, Price);
-			proc.setInt(6, Quantity);
+			proc.setString(3,user);
+			proc.setString(4, CompanyAbbreviation);
+			proc.setString(5, Type);
+			proc.setInt(6, Price);
+			proc.setInt(7, Quantity);
 			proc.execute();
 			int status = proc.getInt(1);
 			if(status == 1){
-				JOptionPane.showMessageDialog(null,"ERROR: insert failed");
+				JOptionPane.showMessageDialog(null,"ERROR: edit failed");
 			}else{
-				JOptionPane.showMessageDialog(null, "Transaction created.");
+				JOptionPane.showMessageDialog(null, "Edit completed.");
 			}
 		}catch(SQLException ex){
 			JOptionPane.showMessageDialog(null, "Failed to run query.");
