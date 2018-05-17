@@ -39,6 +39,7 @@ public class AdminHomepage extends Page {
 	}
 
 	public void draw_page(Graphics g) {
+		getData();
 		gr = g;
 		g.setColor(Color.LIGHT_GRAY);
 		g.fillRect(0, Frame.border, Frame.WIDTH, Frame.HEIGHT - Frame.border);
@@ -62,6 +63,7 @@ public class AdminHomepage extends Page {
 			g.setFont(f.text);
 			// g.drawLine(x1, y1, x2, y2);
 			if (listUsers.size() > 15) {
+				lastPage = (int) Math.ceil(((double) listUsers.size() / 15));
 				g.drawString("Page " + page + " of " + lastPage, Frame.WIDTH - 600, 100);
 				if (page > 1) {
 					g.setColor(Color.DARK_GRAY);
@@ -77,7 +79,6 @@ public class AdminHomepage extends Page {
 					g.setColor(Color.LIGHT_GRAY);
 					g.drawString(">", Frame.WIDTH - 500, 95);
 				}
-				lastPage = (int) Math.ceil((listUsers.size() / 15));
 				for (int i = 0; i < Math.min(15, listUsers.size() - 15 * (page - 1)); i++) {
 					g.setFont(f.smallText);
 					g.setColor(Color.DARK_GRAY);
@@ -100,8 +101,7 @@ public class AdminHomepage extends Page {
 				for (int i = 0; i < listUsers.size(); i++) {
 					g.setFont(f.smallText);
 					g.setColor(Color.DARK_GRAY);
-					String name = listUsers.get(i).get(3) + ", "
-							+ listUsers.get(i).get(1) + " "
+					String name = listUsers.get(i).get(3) + ", " + listUsers.get(i).get(1) + " "
 							+ listUsers.get(i).get(2);
 					g.drawString(listUsers.get(i).get(0), Frame.WIDTH - 650, 140 + 25 * i);
 					g.drawString(name, Frame.WIDTH - 550, 140 + 25 * i);
@@ -174,15 +174,22 @@ public class AdminHomepage extends Page {
 	}
 
 	private void insertUser(String username, String password, String fname, String mid, String lname, String email) {
-		byte[] salt = getNewSalt();
-		String hash = hashPassword(salt, password);
+		byte[] salt;
+		String hash;		
+		if(password.length()>0){
+			salt = getNewSalt();
+			hash = hashPassword(salt, password);
+		}else{
+			salt = null;
+			hash = "";
+		}
 		try {
 			String sqlStatement = "{ ? = call InsertUser(?,?,?,?,?,?,?) }";
 			CallableStatement proc = f.DBCon.getConnection().prepareCall(sqlStatement);
 			proc.registerOutParameter(1, Types.INTEGER);
 			proc.setString(2, username);
-			proc.setString(3, getStringFromBytes(salt));
-			proc.setString(4, hash);
+			proc.setString(3, hash);
+			proc.setString(4, getStringFromBytes(salt));
 			proc.setString(5, fname);
 			proc.setString(6, mid);
 			proc.setString(7, lname);
@@ -207,7 +214,8 @@ public class AdminHomepage extends Page {
 		JTextField f4 = new JTextField();
 		JTextField f5 = new JTextField();
 		JTextField f6 = new JTextField();
-		
+
+		f2.requestFocus();
 		String sqlStatement = "SELECT * FROM [User] WHERE [username] = '" + username + "'";
 		PreparedStatement proc;
 		try {
@@ -220,27 +228,37 @@ public class AdminHomepage extends Page {
 			f6.setText(rs.getString("Email"));
 
 		} catch (SQLException e) {
-			//  Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 
-		Object[] message = { username, "Password:", f2, "First Name:", f3, "Middle Initial:", f4, "Last Name:", f5, "Email:",
-				f6, };
+		Object[] message = { username, "Password:", f2, "First Name:", f3, "Middle Initial:", f4, "Last Name:", f5,
+				"Email:", f6, };
 		int option = JOptionPane.showConfirmDialog(null, message, "Update User Data.", JOptionPane.OK_CANCEL_OPTION);
 		if (option == JOptionPane.OK_OPTION)
 			updateUser(username, f2.getPassword().toString(), f3.getText(), f4.getText(), f5.getText(), f6.getText());
 	}
 
 	private void updateUser(String username, String password, String fname, String mid, String lname, String email) {
-		byte[] salt = getNewSalt();
-		String hash = hashPassword(salt, password);
+		byte[] salt;
+		String hash;		
+		if(password.length()>0){
+			salt = getNewSalt();
+			hash = hashPassword(salt, password);
+		}else{
+			salt = null;
+			hash = "";
+		}
+		System.out.println(hash);
+		System.out.println(getStringFromBytes(salt));
+
 		try {
-			String sqlStatement = "{ ? = call updateUser(?,?,?,?,?,?,?) }";
+			String sqlStatement = "{ ? = call editUser(?,?,?,?,?,?,?) }";
 			CallableStatement proc = f.DBCon.getConnection().prepareCall(sqlStatement);
 			proc.registerOutParameter(1, Types.INTEGER);
 			proc.setString(2, username);
-			proc.setString(3, getStringFromBytes(salt));
-			proc.setString(4, hash);
+			proc.setString(3, hash);
+			proc.setBytes(4, salt);
 			proc.setString(5, fname);
 			proc.setString(6, mid);
 			proc.setString(7, lname);
@@ -248,11 +266,12 @@ public class AdminHomepage extends Page {
 			proc.execute();
 
 			int status = proc.getInt(1);
-			if (status == 1) {
-				JOptionPane.showMessageDialog(null, "ERROR: User does not exist in the database.");
-			} else {
-				JOptionPane.showMessageDialog(null, "User updated.");
-			}
+			// if (status == 1) {
+			// JOptionPane.showMessageDialog(null, "ERROR: User does not exist
+			// in the database.");
+			// } else {
+			// JOptionPane.showMessageDialog(null, "User updated.");
+			// }
 		} catch (SQLException ex) {
 			JOptionPane.showMessageDialog(null, "Failed to run query.");
 			ex.printStackTrace();
@@ -260,28 +279,43 @@ public class AdminHomepage extends Page {
 	}
 
 	public void requestDelete(String username) {
-		JTextField f1 = new JTextField();
+		JPasswordField f1 = new JPasswordField();
 		Object[] message = { username, "Password", f1 };
 		int option = JOptionPane.showConfirmDialog(null, message, "Delete User Data.", JOptionPane.OK_CANCEL_OPTION);
 		if (option == JOptionPane.OK_OPTION)
-			deleteUser(username, f1.getText());
+			deleteUser(username, f1.getPassword().toString());
 	}
 
 	private void deleteUser(String username, String password) {
 		try {
-			String sqlStatement = "{ ? = call deleteUser(?,?) }";
-			CallableStatement proc = f.DBCon.getConnection().prepareCall(sqlStatement);
-			proc.registerOutParameter(1, Types.INTEGER);
-			proc.setString(2, username);
-			proc.setString(3, password);
-			proc.execute();
 
-			int status = proc.getInt(1);
-			if (status == 1) {
-				JOptionPane.showMessageDialog(null, "ERROR: User does not exist in the database.");
+			String sqlStatement2 = "SELECT [Password], Salt FROM [User] WHERE Username = '" + username + "'";
+			PreparedStatement proc2 = f.DBCon.getConnection().prepareStatement(sqlStatement2);
+			ResultSet rs = proc2.executeQuery();
+			rs.next();
+			String realHash = rs.getString("Password");
+			byte[] salt = rs.getBytes("Salt");
+			System.out.println(realHash);
+			System.out.println(getStringFromBytes(salt));
+			String testHash = hashPassword(salt, password);
+			System.out.println(testHash);
+
+			if (realHash.equals(testHash)) {
+				String sqlStatement = "{ ? = call deleteUser(?) }";
+				CallableStatement proc = f.DBCon.getConnection().prepareCall(sqlStatement);
+				proc.registerOutParameter(1, Types.INTEGER);
+				proc.setString(2, username);
+				proc.execute();
+				int status = proc.getInt(1);
+				if (status == 1) {
+					JOptionPane.showMessageDialog(null, "ERROR: User does not exist in the database.");
+				} else {
+					JOptionPane.showMessageDialog(null, "User deleted.");
+				}
 			} else {
-				JOptionPane.showMessageDialog(null, "User deleted.");
+				JOptionPane.showMessageDialog(null, "ERROR: Incorrect Password.");
 			}
+
 		} catch (SQLException ex) {
 			JOptionPane.showMessageDialog(null, "Failed to run query.");
 			ex.printStackTrace();
