@@ -114,7 +114,7 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 			String[] temp = {"Company data","Index data","Manage Company Data","Manage Index Data","Broker", "Admin Homepage", "User Details", "Transactions"};
 			names = temp;
 		}else{
-			String[] temp = {"Company data","Index data","Broker", "User Details"};
+			String[] temp = {"Company data","Index data","Broker", "User Details", "Transactions"};
 			names = temp;
 		}
 		while(true){
