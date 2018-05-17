@@ -125,35 +125,46 @@ public class UserDetailsService extends Page {
 		}
 		return true;
 	}
-
+	
 	public void requestUpdate() {
 		JPasswordField f2 = new JPasswordField();
 		JTextField f3 = new JTextField();
 		JTextField f4 = new JTextField();
 		JTextField f5 = new JTextField();
 		JTextField f6 = new JTextField();
+
+		f2.requestFocus();
 		f3.setText(FName);
 		f4.setText(MID);
 		f5.setText(LName);
 		f6.setText(Email);
 
-		Object[] message = { Username, "Password:", f2, "First Name:", f3, "Middle Initial:", f4, "Last Name:", f5, "Email:",
-				f6, };
+		Object[] message = { Username, "Password:", f2, "First Name:", f3, "Middle Initial:", f4, "Last Name:", f5,
+				"Email:", f6, };
 		int option = JOptionPane.showConfirmDialog(null, message, "Update User Data.", JOptionPane.OK_CANCEL_OPTION);
 		if (option == JOptionPane.OK_OPTION)
-			updateUser(f2.getPassword().toString(), f3.getText(), f4.getText(), f5.getText(), f6.getText());
+			updateUser(String.valueOf(f2.getPassword()), f3.getText(), f4.getText(), f5.getText(), f6.getText());
 	}
 
+	
 	private void updateUser(String password, String fname, String mid, String lname, String email) {
-		byte[] salt = getNewSalt();
-		String hash = hashPassword(salt, password);
+		byte[] salt;
+		String hash;		
+		if(password.length()>0){
+			salt = getNewSalt();
+			hash = hashPassword(salt, password);
+		}else{
+			salt = null;
+			hash = "";
+		}
+		
 		try {
-			String sqlStatement = "{ ? = call updateUser(?,?,?,?,?,?,?) }";
+			String sqlStatement = "{ ? = call editUser(?,?,?,?,?,?,?) }";
 			CallableStatement proc = f.DBCon.getConnection().prepareCall(sqlStatement);
 			proc.registerOutParameter(1, Types.INTEGER);
 			proc.setString(2, Username);
-			proc.setString(3, getStringFromBytes(salt));
-			proc.setString(4, hash);
+			proc.setString(3, hash);
+			proc.setBytes(4, salt);
 			proc.setString(5, fname);
 			proc.setString(6, mid);
 			proc.setString(7, lname);
@@ -161,11 +172,7 @@ public class UserDetailsService extends Page {
 			proc.execute();
 
 			int status = proc.getInt(1);
-			if (status == 1) {
-				JOptionPane.showMessageDialog(null, "ERROR: User does not exist in the database.");
-			} else {
-				JOptionPane.showMessageDialog(null, "User updated.");
-			}
+		
 		} catch (SQLException ex) {
 			JOptionPane.showMessageDialog(null, "Failed to run query.");
 			ex.printStackTrace();
@@ -173,28 +180,40 @@ public class UserDetailsService extends Page {
 	}
 
 	public void requestDelete() {
-		JTextField f1 = new JTextField();
+		JPasswordField f1 = new JPasswordField();
 		Object[] message = { Username, "Password", f1 };
 		int option = JOptionPane.showConfirmDialog(null, message, "Delete User Data.", JOptionPane.OK_CANCEL_OPTION);
 		if (option == JOptionPane.OK_OPTION)
-			deleteUser(f1.getText());
+			deleteUser(String.valueOf(f1.getPassword()));
 	}
-
+	
 	private void deleteUser(String password) {
 		try {
-			String sqlStatement = "{ ? = call deleteUser(?,?) }";
-			CallableStatement proc = f.DBCon.getConnection().prepareCall(sqlStatement);
-			proc.registerOutParameter(1, Types.INTEGER);
-			proc.setString(2, Username);
-			proc.setString(3, password);
-			proc.execute();
 
-			int status = proc.getInt(1);
-			if (status == 1) {
-				JOptionPane.showMessageDialog(null, "ERROR: User does not exist in the database.");
+			String sqlStatement2 = "SELECT [Password], Salt FROM [User] WHERE Username = '" + Username + "'";
+			PreparedStatement proc2 = f.DBCon.getConnection().prepareStatement(sqlStatement2);
+			ResultSet rs = proc2.executeQuery();
+			rs.next();
+			String realHash = rs.getString("Password");
+			byte[] salt = rs.getBytes("Salt");
+			String testHash = hashPassword(salt, password);
+			
+			if (realHash.equals(testHash)) {
+				String sqlStatement = "{ ? = call deleteUser(?) }";
+				CallableStatement proc = f.DBCon.getConnection().prepareCall(sqlStatement);
+				proc.registerOutParameter(1, Types.INTEGER);
+				proc.setString(2, Username);
+				proc.execute();
+				int status = proc.getInt(1);
+				if (status == 1) {
+					JOptionPane.showMessageDialog(null, "ERROR: User does not exist in the database.");
+				} else {
+					JOptionPane.showMessageDialog(null, "User deleted.");
+				}
 			} else {
-				JOptionPane.showMessageDialog(null, "User deleted.");
+				JOptionPane.showMessageDialog(null, "ERROR: Incorrect Password.");
 			}
+
 		} catch (SQLException ex) {
 			JOptionPane.showMessageDialog(null, "Failed to run query.");
 			ex.printStackTrace();
