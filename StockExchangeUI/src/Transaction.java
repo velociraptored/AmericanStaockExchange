@@ -194,6 +194,8 @@ public class Transaction extends Page{
 		if(i<0){
 			return;
 		}
+		String price = TransactionData.get(i).get(4);
+		price = price.substring(0, price.indexOf('.') +  3);
 		JTextField f1 = new JTextField();
 		f1.setDocument(new JTextFieldLimit(10));
 		f1.setText(TransactionData.get(i).get(2));
@@ -202,7 +204,7 @@ public class Transaction extends Page{
 		f2.setText(TransactionData.get(i).get(3));
 		JTextField f3 = new JTextField();
 		f3.setDocument(new JTextFieldLimit(50));
-		f3.setText(TransactionData.get(i).get(4));
+		f3.setText(price);
 		JTextField f4 = new JTextField();
 		f4.setDocument(new JTextFieldLimit(50));
 		f4.setText(TransactionData.get(i).get(5));
@@ -248,7 +250,14 @@ public class Transaction extends Page{
 						+ " and all numbers are positive");
 				return;
 			}
-			
+			if(Price.contains(".")){
+				if(Price.substring(Price.indexOf("."), Price.length()).length() == 2){
+					Price += "0";
+				} else if (Price.substring(Price.indexOf("."), Price.length()).length() > 3){
+					Price = Price.substring(0, Price.indexOf(".")+3);
+				}
+				System.out.println(Price);
+			}
 			String sqlStatement = "{ ? = call CreateTransaction(?,?,?,?,?) }";
 			CallableStatement proc = f.DBCon.getConnection().prepareCall(sqlStatement);
 			proc.registerOutParameter(1, Types.INTEGER);
@@ -277,6 +286,15 @@ public class Transaction extends Page{
 			JOptionPane.showMessageDialog(null,"Insert unsuccessful. Check to ensure input is complete"
 					+ " and all numbers are positive");
 			return;
+		}
+
+		if(Price.contains(".")){
+			if(Price.substring(Price.indexOf("."), Price.length()).length() == 2){
+				Price += "0";
+			} else if (Price.substring(Price.indexOf("."), Price.length()).length() > 3){
+				Price = Price.substring(0, Price.indexOf(".")+3);
+			}
+			System.out.println(Price);
 		}
 		try{
 			String sqlStatement = "{ ? = call EditTransaction(?,?,?,?,?,?) }";
