@@ -165,6 +165,12 @@ public class AdminHomepage extends Page {
 		JTextField f4 = new JTextField();
 		JTextField f5 = new JTextField();
 		JTextField f6 = new JTextField();
+		f2.setDocument(new JTextFieldLimit(20));
+		f2.setDocument(new JTextFieldLimit(40));
+		f3.setDocument(new JTextFieldLimit(20));
+		f4.setDocument(new JTextFieldLimit(1));
+		f5.setDocument(new JTextFieldLimit(20));
+		f6.setDocument(new JTextFieldLimit(30));
 		Object[] message = { "Username:", f1, "Password:", f2, "First Name:", f3, "Middle Initial:", f4, "Last Name:",
 				f5, "Email:", f6, };
 		int option = JOptionPane.showConfirmDialog(null, message, "Insert User Data.", JOptionPane.OK_CANCEL_OPTION);
@@ -214,7 +220,12 @@ public class AdminHomepage extends Page {
 		JTextField f4 = new JTextField();
 		JTextField f5 = new JTextField();
 		JTextField f6 = new JTextField();
-
+		f2.setDocument(new JTextFieldLimit(40));
+		f3.setDocument(new JTextFieldLimit(20));
+		f4.setDocument(new JTextFieldLimit(1));
+		f5.setDocument(new JTextFieldLimit(20));
+		f6.setDocument(new JTextFieldLimit(30));
+		
 		f2.requestFocus();
 		String sqlStatement = "SELECT * FROM [User] WHERE [username] = '" + username + "'";
 		PreparedStatement proc;
@@ -263,7 +274,7 @@ public class AdminHomepage extends Page {
 			proc.setString(8, email);
 			proc.execute();
 
-			int status = proc.getInt(1);
+		
 		
 		} catch (SQLException ex) {
 			JOptionPane.showMessageDialog(null, "Failed to run query.");
