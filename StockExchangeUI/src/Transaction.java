@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
-
+ 
 public class Transaction extends Page{
 	/*private String TID;
 	private String TimeStamp;
