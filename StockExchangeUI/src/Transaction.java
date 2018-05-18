@@ -122,7 +122,7 @@ public class Transaction extends Page{
 						TransactionData.get(i).get(2)+" stocks at $"+TransactionData.get(i).get(4)+
 						"/stock ";
 			} else {
-				names[i] = TransactionData.get(i).get(0)+": "+TransactionData.get(i).get(3)+" "+TransactionData.get(i).get(5)+" "+
+				names[i] = "["+TransactionData.get(i).get(0)+"]: "+TransactionData.get(i).get(3)+" "+TransactionData.get(i).get(5)+" "+
 							TransactionData.get(i).get(2)+" stocks at $"+TransactionData.get(i).get(4)+
 							"/stock ";
 			}
