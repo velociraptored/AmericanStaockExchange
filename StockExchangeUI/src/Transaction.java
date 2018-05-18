@@ -67,7 +67,6 @@ public class Transaction extends Page{
 	
 	public void getTransactionData(){
 		isAdmin = f.getAdmin();
-		System.out.println("isAdmin "+isAdmin);
 		try{
 			String sqlStatement;
 			if(isAdmin){
@@ -150,6 +149,7 @@ public class Transaction extends Page{
 			}
 		if (currIndex < 0){
 			System.out.println("transaction data doesn't exist for this entry");
+			return;
 		}
 		requestUpdate(myTID, currIndex);		
 	}
@@ -192,17 +192,20 @@ public class Transaction extends Page{
 	
 	public void requestUpdate(String myTID, int i){
 		if(i<0){
-			System.out.println("leaving");
 			return;
 		}
-		JTextField f1 = new JTextField(TransactionData.get(i).get(2));
+		JTextField f1 = new JTextField();
 		f1.setDocument(new JTextFieldLimit(10));
-		JTextField f2 = new JTextField(TransactionData.get(i).get(3));
+		f1.setText(TransactionData.get(i).get(2));
+		JTextField f2 = new JTextField();
 		f2.setDocument(new JTextFieldLimit(4));
-		JTextField f3 = new JTextField(TransactionData.get(i).get(50));
-		f3.setDocument(new JTextFieldLimit(6));
-		JTextField f4 = new JTextField(TransactionData.get(i).get(5));
+		f2.setText(TransactionData.get(i).get(3));
+		JTextField f3 = new JTextField();
+		f3.setDocument(new JTextFieldLimit(50));
+		f3.setText(TransactionData.get(i).get(4));
+		JTextField f4 = new JTextField();
 		f4.setDocument(new JTextFieldLimit(50));
+		f4.setText(TransactionData.get(i).get(5));
 		Object[] message = {
 				"Company Abbreviation:", f1,
 				"Type:", f2,
@@ -210,8 +213,9 @@ public class Transaction extends Page{
 				"Quantity:", f4
 		};
 		if (isAdmin) {
-			JTextField f5 = new JTextField(TransactionData.get(i).get(6));
+			JTextField f5 = new JTextField();
 			f5.setDocument(new JTextFieldLimit(20));
+			f5.setText(TransactionData.get(i).get(6));
 			Object[] messageAdmin = {
 					"Company Abbreviation:", f1,
 					"Type:", f2,
@@ -242,6 +246,7 @@ public class Transaction extends Page{
 					|| Quantity <= 0){
 				JOptionPane.showMessageDialog(null,"Insert unsuccessful. Check to ensure input is complete"
 						+ " and all numbers are positive");
+				return;
 			}
 			
 			String sqlStatement = "{ ? = call CreateTransaction(?,?,?,?,?) }";
@@ -267,7 +272,12 @@ public class Transaction extends Page{
 	}
 	
 	public void editTransaction(String user, int TID, String CompanyAbbreviation, String Type, String Price, int Quantity ){
-
+		if (user.length() <= 0 || CompanyAbbreviation.length() <= 0 || Type.length() <= 0 || Price.length() <= 0 
+				|| Quantity <= 0 ||TID < 0){
+			JOptionPane.showMessageDialog(null,"Insert unsuccessful. Check to ensure input is complete"
+					+ " and all numbers are positive");
+			return;
+		}
 		try{
 			String sqlStatement = "{ ? = call EditTransaction(?,?,?,?,?,?) }";
 			CallableStatement proc = f.DBCon.getConnection().prepareCall(sqlStatement);
