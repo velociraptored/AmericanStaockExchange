@@ -47,7 +47,7 @@ public class Frame extends JFrame implements MouseMotionListener, MouseListener,
 	// Admin privilages
 	private boolean admin;
 	public void setAdmin(boolean a){admin = a;}
-
+	public boolean getAdmin(){return admin;}
 	// Constructor
 	public Frame(DBConnection con){
 		super("StockDatabase");

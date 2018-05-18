@@ -17,11 +17,9 @@ public class Transaction extends Page{
 	private String Type;
 	private String Price;
 	private String Quantity;*/
-	
-	private int TransactionNumber;
+	private Boolean isAdmin;
 	private Frame f;
 	private ArrayList<ArrayList<String>> TransactionData;
-	private String currUser;
 	
 	private String[] NAMES = {"Insert", "Edit"};
 	
@@ -68,9 +66,17 @@ public class Transaction extends Page{
 	}
 	
 	public void getTransactionData(){
+		isAdmin = f.getAdmin();
+		System.out.println("isAdmin "+isAdmin);
 		try{
-			String sqlStatement = "SELECT * FROM [Transaction] WHERE [User] = '" 
+			String sqlStatement;
+			if(isAdmin){
+				sqlStatement = "SELECT * FROM [Transaction] ORDER BY TimeStamp DESC";
+			}
+			else {
+				sqlStatement = "SELECT * FROM [Transaction] WHERE [User] = '"
 									+ Main.username + "' ORDER BY TimeStamp DESC";
+			}
 			PreparedStatement proc = f.DBCon.getConnection().prepareStatement(sqlStatement);
 			ResultSet rs = proc.executeQuery();
 			int TID = 					rs.findColumn("TID");
@@ -105,13 +111,21 @@ public class Transaction extends Page{
 	}
 	
 	public void requestEdit(){
+		getTransactionData();
 		String[] names = new String[TransactionData.size()];
 		for(int i = 0; i < TransactionData.size(); i++){
 			/*"BUY 3 APPL stocks at $4/stock"*/
 			/*TODO: change stocks to stock if only 1 stock exchanged*/
-			names[i] = TransactionData.get(i).get(0)+": "+TransactionData.get(i).get(3)+" "+TransactionData.get(i).get(5)+" "+
+			if (isAdmin){
+				names[i] = "User "+TransactionData.get(i).get(6)+ " with TID [" +TransactionData.get(i).get(0)+"]: "
+						+TransactionData.get(i).get(3)+" "+TransactionData.get(i).get(5)+" "+
 						TransactionData.get(i).get(2)+" stocks at $"+TransactionData.get(i).get(4)+
 						"/stock ";
+			} else {
+				names[i] = TransactionData.get(i).get(0)+": "+TransactionData.get(i).get(3)+" "+TransactionData.get(i).get(5)+" "+
+							TransactionData.get(i).get(2)+" stocks at $"+TransactionData.get(i).get(4)+
+							"/stock ";
+			}
 		}
 		String s;
 		if(names.length != 0){
@@ -119,18 +133,25 @@ public class Transaction extends Page{
 				"Transaction Selection", JOptionPane.QUESTION_MESSAGE, null, names, names[0]);
 		} else {
 			s = null;
-			JOptionPane.showMessageDialog(null, "You haven't made any transactions yet.");
+			if (isAdmin){
+				JOptionPane.showMessageDialog(null, "No transactions in the database yet.");
+			} else {
+				JOptionPane.showMessageDialog(null, "You haven't made any transactions yet.");
+			}
 		}
 		if(s == null){
 			return;
 		}
-		String myTID = s.substring(s.indexOf('[')+1, s.indexOf(':'));
+		String myTID = s.substring(s.indexOf('[')+1, s.indexOf(']'));
 		int currIndex = -1;
 		for(int i = 0; i < TransactionData.size(); i++)
 			if(TransactionData.get(i).get(0).equals(myTID)){
 				currIndex = i;
 				break;
 			}
+		if (currIndex < 0){
+			System.out.println("transaction data doesn't exist for this entry");
+		}
 		requestUpdate(myTID, currIndex);		
 	}
 	
@@ -145,14 +166,29 @@ public class Transaction extends Page{
 				"Price: $", f3,
 				"Quantity:", f4
 		};
-		int option = JOptionPane.showConfirmDialog(null, message, "Create Transaction.", JOptionPane.OK_CANCEL_OPTION);
-		if (option == JOptionPane.OK_OPTION)
-			insertTransaction(Main.username, f1.getText(),f2.getText(),f3.getText(),Integer.parseInt(f4.getText()));
+		if(isAdmin){
+			JTextField f5 = new JTextField();
+			Object[] messageAdmin = {
+					"Company Abbreviation:", f1,
+					"Type:", f2,
+					"Price: $", f3,
+					"Quantity:", f4,
+					"User:", f5
+			};
+			int option = JOptionPane.showConfirmDialog(null, messageAdmin, "Create Transaction.", JOptionPane.OK_CANCEL_OPTION);
+			if (option == JOptionPane.OK_OPTION)
+				insertTransaction(f5.getText(), f1.getText(),f2.getText(),f3.getText(),Integer.parseInt(f4.getText()));
+		} else {
+			int option = JOptionPane.showConfirmDialog(null, message, "Create Transaction.", JOptionPane.OK_CANCEL_OPTION);
+			if (option == JOptionPane.OK_OPTION)
+				insertTransaction(Main.username, f1.getText(),f2.getText(),f3.getText(),Integer.parseInt(f4.getText()));
+		}
 	}
 	
 	
 	public void requestUpdate(String myTID, int i){
 		if(i<0){
+			System.out.println("leaving");
 			return;
 		}
 		JTextField f1 = new JTextField(TransactionData.get(i).get(2));
@@ -165,16 +201,40 @@ public class Transaction extends Page{
 				"Price:", f3,
 				"Quantity:", f4
 		};
-		int option = JOptionPane.showConfirmDialog(null, message, "Edit Transaction.", JOptionPane.OK_CANCEL_OPTION);
-
-		if (option == JOptionPane.OK_OPTION)
-			editTransaction(Main.username, Integer.parseInt(myTID), f1.getText(), f2.getText(),Integer.parseInt(f3.getText()),Integer.parseInt(f4.getText()));
-		else 
-			getData();
+		if (isAdmin) {
+			JTextField f5 = new JTextField(TransactionData.get(i).get(6));
+			Object[] messageAdmin = {
+					"Company Abbreviation:", f1,
+					"Type:", f2,
+					"Price:", f3,
+					"Quantity:", f4,
+					"User:", f5
+			};
+			int option = JOptionPane.showConfirmDialog(null, messageAdmin, "Edit Transaction.", JOptionPane.OK_CANCEL_OPTION);
+	
+			if (option == JOptionPane.OK_OPTION)
+				editTransaction(f5.getText(), Integer.parseInt(myTID), f1.getText(), f2.getText(), f3.getText(), Integer.parseInt(f4.getText()));
+			else 
+				getData();
+		}
+		else {
+			int option = JOptionPane.showConfirmDialog(null, message, "Edit Transaction.", JOptionPane.OK_CANCEL_OPTION);
+	
+			if (option == JOptionPane.OK_OPTION)
+				editTransaction(Main.username, Integer.parseInt(myTID), f1.getText(), f2.getText(), f3.getText(), Integer.parseInt(f4.getText()));
+			else 
+				getData();
+		}
 	}
 	
 	public void insertTransaction(String user, String Abb, String Type, String Price, int Quantity){
 		try{
+			if (user.length() <= 0 || Abb.length() <= 0 || Type.length() <= 0 || Price.length() <= 0 
+					|| Quantity <= 0){
+				JOptionPane.showMessageDialog(null,"Insert unsuccessful. Check to ensure input is complete"
+						+ " and all numbers are positive");
+			}
+			
 			String sqlStatement = "{ ? = call CreateTransaction(?,?,?,?,?) }";
 			CallableStatement proc = f.DBCon.getConnection().prepareCall(sqlStatement);
 			proc.registerOutParameter(1, Types.INTEGER);
@@ -197,7 +257,7 @@ public class Transaction extends Page{
 		}
 	}
 	
-	public void editTransaction(String user, int TID, String CompanyAbbreviation, String Type, int Price, int Quantity ){
+	public void editTransaction(String user, int TID, String CompanyAbbreviation, String Type, String Price, int Quantity ){
 
 		try{
 			String sqlStatement = "{ ? = call EditTransaction(?,?,?,?,?,?) }";
@@ -207,7 +267,7 @@ public class Transaction extends Page{
 			proc.setString(3,user);
 			proc.setString(4, CompanyAbbreviation);
 			proc.setString(5, Type);
-			proc.setInt(6, Price);
+			proc.setString(6, Price);
 			proc.setInt(7, Quantity);
 			proc.execute();
 			int status = proc.getInt(1);
