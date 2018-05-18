@@ -115,7 +115,6 @@ public class Transaction extends Page{
 		String[] names = new String[TransactionData.size()];
 		for(int i = 0; i < TransactionData.size(); i++){
 			/*"BUY 3 APPL stocks at $4/stock"*/
-			/*TODO: change stocks to stock if only 1 stock exchanged*/
 			if (isAdmin){
 				names[i] = "User "+TransactionData.get(i).get(6)+ " with TID [" +TransactionData.get(i).get(0)+"]: "
 						+TransactionData.get(i).get(3)+" "+TransactionData.get(i).get(5)+" "+
@@ -157,9 +156,13 @@ public class Transaction extends Page{
 	
 	public void requestInsert(){
 		JTextField f1 = new JTextField();
+		f1.setDocument(new JTextFieldLimit(10));
 		JTextField f2 = new JTextField();
+		f2.setDocument(new JTextFieldLimit(4));
 		JTextField f3 = new JTextField();
+		f3.setDocument(new JTextFieldLimit(50));
 		JTextField f4 = new JTextField();
+		f4.setDocument(new JTextFieldLimit(50));
 		Object[] message = {
 				"Company Abbreviation:", f1,
 				"Type:", f2,
@@ -168,6 +171,7 @@ public class Transaction extends Page{
 		};
 		if(isAdmin){
 			JTextField f5 = new JTextField();
+			f5.setDocument(new JTextFieldLimit(20));
 			Object[] messageAdmin = {
 					"Company Abbreviation:", f1,
 					"Type:", f2,
@@ -192,9 +196,13 @@ public class Transaction extends Page{
 			return;
 		}
 		JTextField f1 = new JTextField(TransactionData.get(i).get(2));
+		f1.setDocument(new JTextFieldLimit(10));
 		JTextField f2 = new JTextField(TransactionData.get(i).get(3));
-		JTextField f3 = new JTextField(TransactionData.get(i).get(4));
+		f2.setDocument(new JTextFieldLimit(4));
+		JTextField f3 = new JTextField(TransactionData.get(i).get(50));
+		f3.setDocument(new JTextFieldLimit(6));
 		JTextField f4 = new JTextField(TransactionData.get(i).get(5));
+		f4.setDocument(new JTextFieldLimit(50));
 		Object[] message = {
 				"Company Abbreviation:", f1,
 				"Type:", f2,
@@ -203,6 +211,7 @@ public class Transaction extends Page{
 		};
 		if (isAdmin) {
 			JTextField f5 = new JTextField(TransactionData.get(i).get(6));
+			f5.setDocument(new JTextFieldLimit(20));
 			Object[] messageAdmin = {
 					"Company Abbreviation:", f1,
 					"Type:", f2,
